@@ -223,7 +223,7 @@ Name=fps.panel
 Text=
 PositionX=0
 PositionY=133
-ExtentX=225
+ExtentX=227
 ExtentY=91
 ExtentOrigin=0
 BgndColor=1AFFFFFF
@@ -234,7 +234,7 @@ Name=background
 Text="    "
 PositionX=0
 PositionY=0
-ExtentX=225
+ExtentX=227
 ExtentY=225
 ExtentOrigin=4
 Size=70
@@ -242,7 +242,7 @@ BgndColor=5A000000
 [Layer2]
 Name=header
 Text={HEADER}
-PositionX=0
+PositionX=2
 PositionY=0
 ExtentX=-32
 ExtentY=-1
@@ -252,7 +252,7 @@ TextColor=FFFFFF
 [Layer3]
 Name=label.cpu
 Text=%CPU%
-PositionX=0
+PositionX=2
 PositionY=11
 ExtentX=0
 ExtentY=0
@@ -262,7 +262,7 @@ TextColor=6CCBFF
 [Layer4]
 Name=label.cpu
 Text=Single/Multi core usage
-PositionX=0
+PositionX=2
 PositionY=20
 ExtentX=51
 ExtentY=7
@@ -272,7 +272,7 @@ TextColor=6CCBFF
 [Layer5]
 Name=label.cpu
 Text="RAM "
-PositionX=0
+PositionX=2
 PositionY=29
 ExtentX=0
 ExtentY=0
@@ -282,7 +282,7 @@ TextColor=6CCBFF
 [Layer6]
 Name=label.gpu
 Text=%GPU%
-PositionX=0
+PositionX=2
 PositionY=74
 ExtentX=49
 ExtentY=7
@@ -292,7 +292,7 @@ TextColor=8CD95A
 [Layer7]
 Name=label.gpu
 Text=VRAM
-PositionX=0
+PositionX=2
 PositionY=83
 ExtentX=0
 ExtentY=0
@@ -302,7 +302,7 @@ TextColor=8CD95A
 [Layer8]
 Name=label.gpu.row3
 Text=VRM/Hot Spot
-PositionX=0
+PositionX=2
 PositionY=92
 ExtentX=0
 ExtentY=0
@@ -322,7 +322,7 @@ TextColor=FFC94A
 [Layer10]
 Name=cell:cpu.clock:value
 Text=%P-core 0 Clock%/%E-core 8 Clock%
-PositionX=101
+PositionX=103
 PositionY=11
 ExtentX=41
 ExtentY=6
@@ -332,7 +332,7 @@ TextColor=FFFFFF
 [Layer11]
 Name=cell:cpu.usage:value
 Text=%CPU usage%
-PositionX=165
+PositionX=167
 PositionY=20
 ExtentX=16
 ExtentY=3
@@ -342,7 +342,7 @@ TextColor=FFFFFF
 [Layer12]
 Name=cell:ram.used:value
 Text=%RAM usage%
-PositionX=119
+PositionX=121
 PositionY=29
 ExtentX=23
 ExtentY=8
@@ -352,7 +352,7 @@ TextColor=FFFFFF
 [Layer13]
 Name=cell:gpu.clock:value
 Text=%GPU Clock%
-PositionX=119
+PositionX=121
 PositionY=74
 ExtentX=23
 ExtentY=8
@@ -372,7 +372,7 @@ TextColor=FFC94A
 [Layer15]
 Name=label.gpu
 Text=GPU Usage
-PositionX=0
+PositionX=2
 PositionY=101
 ExtentX=40
 ExtentY=9
@@ -382,7 +382,7 @@ TextColor=8CD95A
 [Layer16]
 Name=gpu.usage.graph
 Text=<G=GPU1 usage,0,0,-1,2,100,0>
-PositionX=0
+PositionX=2
 PositionY=110
 ExtentX=189
 ExtentY=22
@@ -395,7 +395,7 @@ BorderSize=1
 [Layer17]
 Name=gpu.usage.value
 Text=%GPU1 usage%
-PositionX=190
+PositionX=192
 PositionY=113
 ExtentX=26
 ExtentY=16
@@ -407,7 +407,7 @@ Name=fps.graph
 Text=<G=Framerate,0,0,-1,0,500,0>
 PositionX=2
 PositionY=171
-ExtentX=172
+ExtentX=174
 ExtentY=20
 ExtentOrigin=0
 Size=70
@@ -418,7 +418,7 @@ BorderSize=1
 [Layer19]
 Name=fps.cur
 Text=<FR>
-PositionX=175
+PositionX=177
 PositionY=173
 ExtentX=37
 ExtentY=12
@@ -430,7 +430,7 @@ Name=ft.graph
 Text=<G=Frametime,0,0,-1,0,50,0>
 PositionX=2
 PositionY=201
-ExtentX=178
+ExtentX=180
 ExtentY=20
 ExtentOrigin=0
 Size=80
@@ -441,7 +441,7 @@ BorderSize=1
 [Layer21]
 Name=fps.ft
 Text=<FT>
-PositionX=181
+PositionX=183
 PositionY=206
 ExtentX=30
 ExtentY=11
@@ -451,7 +451,7 @@ TextColor=FFFFFF
 [Layer22]
 Name=fps.avg.unit
 Text=FPS
-PositionX=132
+PositionX=134
 PositionY=138
 ExtentX=7
 ExtentY=6
@@ -461,7 +461,7 @@ TextColor=E6E6E6
 [Layer23]
 Name=fps.low1.unit
 Text=FPS
-PositionX=173
+PositionX=175
 PositionY=138
 ExtentX=7
 ExtentY=6
@@ -471,7 +471,7 @@ TextColor=E6E6E6
 [Layer24]
 Name=fps.low01.unit
 Text=FPS
-PositionX=215
+PositionX=217
 PositionY=138
 ExtentX=7
 ExtentY=6
@@ -481,7 +481,7 @@ TextColor=E6E6E6
 [Layer25]
 Name=fps.avg
 Text=<FRAVG>
-PositionX=86
+PositionX=88
 PositionY=138
 ExtentX=46
 ExtentY=19
@@ -491,7 +491,7 @@ TextColor=FF5A5A,,30,FFD040,30,60,FFFFFF,60,(Framerate Avg,0)
 [Layer26]
 Name=fps.low1
 Text=<FR10L>
-PositionX=139
+PositionX=141
 PositionY=138
 ExtentX=34
 ExtentY=16
@@ -501,7 +501,7 @@ TextColor=FF5A5A,,30,FFD040,30,60,FFFFFF,60,(Framerate 1% Low,0)
 [Layer27]
 Name=fps.low01
 Text=<FR01L>
-PositionX=181
+PositionX=183
 PositionY=138
 ExtentX=34
 ExtentY=16
@@ -511,7 +511,7 @@ TextColor=FF5A5A,,30,FFD040,30,60,FFFFFF,60,(Framerate 0.1% Low,0)
 [Layer28]
 Name=cell:gpu.fan:value
 Text=%GPU1 fan tachometer%
-PositionX=158
+PositionX=160
 PositionY=74
 ExtentX=23
 ExtentY=8
@@ -521,7 +521,7 @@ TextColor=FFFFFF
 [Layer29]
 Name=cell:gpu.temp:value
 Text=%GPU temperature%
-PositionX=198
+PositionX=200
 PositionY=74
 ExtentX=15
 ExtentY=8
@@ -531,7 +531,7 @@ TextColor=FFFFFF,,75,FFD040,75,83,FF5A5A,83,(GPU temperature,0)
 [Layer30]
 Name=cell:gpu.clock:unit
 Text=MHz
-PositionX=143
+PositionX=145
 PositionY=74
 ExtentX=6
 ExtentY=3
@@ -541,7 +541,7 @@ TextColor=E6E6E6
 [Layer31]
 Name=cell:gpu.fan:unit
 Text=RPM
-PositionX=182
+PositionX=184
 PositionY=74
 ExtentX=6
 ExtentY=1
@@ -551,7 +551,7 @@ TextColor=E6E6E6
 [Layer32]
 Name=cell:gpu.temp:unit
 Text=°C
-PositionX=214
+PositionX=216
 PositionY=74
 ExtentX=5
 ExtentY=3
@@ -561,7 +561,7 @@ TextColor=E6E6E6
 [Layer33]
 Name=cell:gpu.memclock:value
 Text=%GPU1 memory clock%
-PositionX=119
+PositionX=121
 PositionY=83
 ExtentX=23
 ExtentY=8
@@ -572,7 +572,7 @@ MarginTop=1
 [Layer34]
 Name=cell:gpu.memclock:unit
 Text=MHz
-PositionX=143
+PositionX=145
 PositionY=83
 ExtentX=6
 ExtentY=2
@@ -582,7 +582,7 @@ TextColor=E6E6E6
 [Layer35]
 Name=cell:gpu.memused:value
 Text=%GPU Memory Usage%
-PositionX=158
+PositionX=160
 PositionY=83
 ExtentX=23
 ExtentY=8
@@ -593,7 +593,7 @@ MarginTop=1
 [Layer36]
 Name=cell:gpu.memused:unit
 Text=MB
-PositionX=182
+PositionX=184
 PositionY=83
 ExtentX=5
 ExtentY=5
@@ -603,7 +603,7 @@ TextColor=E6E6E6
 [Layer37]
 Name=cell:gpu.power:value
 Text=%GPU1 power%
-PositionX=158
+PositionX=160
 PositionY=92
 ExtentX=23
 ExtentY=9
@@ -614,7 +614,7 @@ MarginBottom=1
 [Layer38]
 Name=cell:gpu.voltage:unit
 Text=V
-PositionX=143
+PositionX=145
 PositionY=92
 ExtentX=6
 ExtentY=6
@@ -624,7 +624,7 @@ TextColor=E6E6E6
 [Layer39]
 Name=cell:ram.used:unit
 Text=MB
-PositionX=143
+PositionX=145
 PositionY=29
 ExtentX=3
 ExtentY=7
@@ -634,7 +634,7 @@ TextColor=E6E6E6
 [Layer40]
 Name=cell:ram.rate:unit
 Text=MHz
-PositionX=38
+PositionX=40
 PositionY=29
 ExtentX=6
 ExtentY=4
@@ -644,7 +644,7 @@ TextColor=E6E6E6
 [Layer41]
 Name=cell:ram.rate:value
 Text=%Memory Clock%
-PositionX=19
+PositionX=21
 PositionY=29
 ExtentX=18
 ExtentY=5
@@ -654,7 +654,7 @@ TextColor=FFFFFF
 [Layer42]
 Name=ram.timings
 Text=%Tcas%-%Trcd%-%Trp%-%Tras%-%Trc%-%Trfc%
-PositionX=49
+PositionX=51
 PositionY=30
 ExtentX=0
 ExtentY=0
@@ -664,7 +664,7 @@ TextColor=D2D2D2
 [Layer43]
 Name=cell:ram.temp:unit
 Text=°C
-PositionX=182
+PositionX=184
 PositionY=29
 ExtentX=7
 ExtentY=5
@@ -674,7 +674,7 @@ TextColor=E6E6E6
 [Layer44]
 Name=cell:cpu.clock:unit
 Text=MHz
-PositionX=143
+PositionX=145
 PositionY=11
 ExtentX=0
 ExtentY=0
@@ -684,7 +684,7 @@ TextColor=E6E6E6
 [Layer45]
 Name=cell:cpu.temp:value
 Text=%CPU Package%/%E-core 11%
-PositionX=181
+PositionX=183
 PositionY=11
 ExtentX=32
 ExtentY=8
@@ -694,7 +694,7 @@ TextColor=FFFFFF,,80,FFD040,80,90,FF5A5A,90,(CPU Package,0)
 [Layer46]
 Name=cell:cpu.temp:unit
 Text=°C
-PositionX=214
+PositionX=216
 PositionY=11
 ExtentX=3
 ExtentY=5
@@ -704,7 +704,7 @@ TextColor=E6E6E6
 [Layer47]
 Name=cell:cpu.usagemax:unit
 Text=%
-PositionX=143
+PositionX=145
 PositionY=20
 ExtentX=7
 ExtentY=8
@@ -714,7 +714,7 @@ TextColor=E6E6E6
 [Layer48]
 Name=cell:cpu.usage:unit
 Text=%
-PositionX=182
+PositionX=184
 PositionY=20
 ExtentX=6
 ExtentY=6
@@ -724,7 +724,7 @@ TextColor=E6E6E6
 [Layer49]
 Name=cell:cpu.usagemax:value
 Text=%CPU usage max%
-PositionX=124
+PositionX=126
 PositionY=20
 ExtentX=18
 ExtentY=8
@@ -734,7 +734,7 @@ TextColor=FFFFFF
 [Layer50]
 Name=cell:cpu.power:unit
 Text=W
-PositionX=214
+PositionX=216
 PositionY=20
 ExtentX=4
 ExtentY=4
@@ -744,7 +744,7 @@ TextColor=E6E6E6
 [Layer51]
 Name=cell:cpu.power:value
 Text=%CPU power%
-PositionX=195
+PositionX=197
 PositionY=20
 ExtentX=18
 ExtentY=9
@@ -754,7 +754,7 @@ TextColor=FFFFFF
 [Layer52]
 Name=cell:cpu.vcore:value
 Text=%Vcore%
-PositionX=158
+PositionX=160
 PositionY=11
 ExtentX=23
 ExtentY=6
@@ -764,7 +764,7 @@ TextColor=FFFFFF
 [Layer53]
 Name=cell:cpu.vcore:unit
 Text=V
-PositionX=182
+PositionX=184
 PositionY=11
 ExtentX=6
 ExtentY=4
@@ -774,7 +774,7 @@ TextColor=E6E6E6
 [Layer54]
 Name=cell:gpu.power:unit
 Text=W
-PositionX=182
+PositionX=184
 PositionY=92
 ExtentX=5
 ExtentY=4
@@ -784,7 +784,7 @@ TextColor=E6E6E6
 [Layer55]
 Name=fps.cur.unit
 Text=FPS
-PositionX=213
+PositionX=215
 PositionY=183
 ExtentX=7
 ExtentY=4
@@ -794,7 +794,7 @@ TextColor=E6E6E6
 [Layer56]
 Name=fps.ft.unit
 Text=ms
-PositionX=212
+PositionX=214
 PositionY=209
 ExtentX=1
 ExtentY=7
@@ -804,7 +804,7 @@ TextColor=E6E6E6
 [Layer57]
 Name=gpu.usage.unit
 Text=%
-PositionX=215
+PositionX=217
 PositionY=121
 ExtentX=6
 ExtentY=6
@@ -834,7 +834,7 @@ TextColor=FFC94A
 [Layer60]
 Name=bars.p
 Text={BARS_P}
-PositionX=0
+PositionX=2
 PositionY=39
 ExtentX=128
 ExtentY=34
@@ -844,7 +844,7 @@ TextColor=FFFFFF
 Name=cell:ram.temp:value
 VisibilitySource=DIMM Temperature
 Text=%DIMM Temperature%
-PositionX=165
+PositionX=167
 PositionY=29
 ExtentX=16
 ExtentY=5
@@ -854,7 +854,7 @@ TextColor=FFFFFF,,50,FFD040,50,60,FF5A5A,60,(DIMM Temperature,0)
 [Layer62]
 Name=bars.e
 Text={BARS_E}
-PositionX=132
+PositionX=134
 PositionY=39
 ExtentX=87
 ExtentY=34
@@ -863,7 +863,7 @@ TextColor=FFFFFF
 [Layer63]
 Name=cell:gpu.memtemp:value
 Text=%GPU Memory Junction Temperature%
-PositionX=198
+PositionX=200
 PositionY=83
 ExtentX=15
 ExtentY=8
@@ -873,7 +873,7 @@ TextColor=FFFFFF,,90,FFD040,90,100,FF5A5A,100,(GPU Memory Junction Temperature,0
 [Layer64]
 Name=cell:gpu.memtemp:unit
 Text=°C
-PositionX=214
+PositionX=216
 PositionY=83
 ExtentX=5
 ExtentY=3
@@ -883,7 +883,7 @@ TextColor=E6E6E6
 [Layer65]
 Name=cell:gpu.voltage:value
 Text=%GPU Core Voltage%
-PositionX=119
+PositionX=121
 PositionY=92
 ExtentX=23
 ExtentY=9
@@ -894,7 +894,7 @@ MarginBottom=2
 [Layer66]
 Name=cell:gpu.hotspot:value
 Text=%GPU Hot Spot Temperature%
-PositionX=198
+PositionX=200
 PositionY=92
 ExtentX=15
 ExtentY=8
@@ -904,7 +904,7 @@ TextColor=FFFFFF,,85,FFD040,85,95,FF5A5A,95,(GPU Hot Spot Temperature,0)
 [Layer67]
 Name=cell:gpu.hotspot:unit
 Text=°C
-PositionX=214
+PositionX=216
 PositionY=92
 ExtentX=5
 ExtentY=3
@@ -914,7 +914,7 @@ TextColor=E6E6E6
 [Layer68]
 Name=cell:ram.voltage:unit
 Text=V
-PositionX=214
+PositionX=216
 PositionY=29
 ExtentX=6
 ExtentY=6
@@ -924,7 +924,7 @@ TextColor=E6E6E6
 [Layer69]
 Name=cell:ram.voltage:value
 Text=%DRAM%
-PositionX=190
+PositionX=192
 PositionY=29
 ExtentX=23
 ExtentY=9
