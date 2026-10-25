@@ -29,7 +29,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Warning colors:** overheating and low FPS turn yellow and red.
 - **Two fonts:** Unispace (classic) and Bahnschrift.
 - **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
-- **Native FPS under frame generation** (compact style): like Steam, it shows the game's real frame rate and the total
+- **Native FPS under frame generation** (both styles): like Steam, it shows the game's real frame rate and the total
   with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
 - Installer and documentation in Russian and English.
 
@@ -59,6 +59,7 @@ Assigned during the install — just press the combination you want.
 | Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
 After RTSS restarts, the main style is enabled — the full one (to make the compact line main: `install.bat -Style Compact`).
+How switching works and how to change the key by hand — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#how-style-switching-works).
 
 ## MSI Afterburner
 
@@ -87,10 +88,14 @@ Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busie
 ### Frame generation
 
 With frame generation RTSS shows the total FPS, not the real one: "120 FPS" with DLSS FG is 60 game frames plus
-60 generated. Like the Steam overlay, the compact style tells them apart using **PresentMon** (bundled with RTSS and
+60 generated. Like the Steam overlay, both styles tell them apart using **PresentMon** (bundled with RTSS and
 started automatically): it takes the time between the starts of the game's own frames, which generated frames do not
-affect. When the total FPS is 1.5× the real one or more, the line becomes `FPS 60 FG 120 ↓… ↑…` — the game's real FPS
-first, then the total.
+affect. When the total FPS is 1.5× the real one or more:
+- **full overlay** — the big number under the graph becomes the game's real FPS, and the caption above the graph
+  becomes `Native Framerate  FG 120` (the total FPS with generation);
+- **compact line** — `FPS 60 FG 120 ↓… ↑…`: the game's real FPS first, then the total.
+
+How it works and how to change the thresholds — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#frame-generation).
 
 Tested without frame generation; not yet tested with DLSS FG, FSR FG or AFMF — if the numbers look wrong, please open
 an [issue](../../issues).

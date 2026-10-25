@@ -207,6 +207,13 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     Set-Key (Layer 'fps.graph') 'TextColor' "60$($script:Palette.Fps)"
     Set-Key (Layer 'ft.graph') 'Text' '<G=Frametime,0,0,-1,0,50,80>'
     Set-Key (Layer 'ft.graph') 'TextColor' 'FFFFFF'
+
+    # --- генерация кадров -------------------------------------------------------------------------
+    # RTSS считает и сгенерированные кадры. При генерации (IsFG — источники PresentMon, их добавляет Add-CompactStyle)
+    # крупное число — реальный FPS игры, а итоговый с генерацией — в подписи над графиком: «Native Framerate  FG 120».
+    Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
+    $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
+    Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG %TotalFPS%<ELSE>Current Framerate<IF>'
     # GPU Usage: залитая область цвета вендора видеокарты, шкала фиксированная 0..100 % — высота сразу читается
     # как загрузка (автомасштаб тут вреден: 20 % растягивались бы на всю высоту)
     Set-Key (Layer 'gpu.usage.graph') 'Text' '<G=GPU1 usage,0,0,-1,0,100,1>'

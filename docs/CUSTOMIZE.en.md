@@ -62,10 +62,62 @@ arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per
 `<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. Block colors: FPS `E8836B`, CPU `E5C35C`,
 GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
 
-Which style is shown is decided by the `StyleFull` and `StyleCompact` sources: the formula `(key(0x91) & 1) == 0`
-means an even number of Scroll Lock presses (0x91 is the key code). Full-style layers use the `StyleFull` visibility,
-the temperature layers use `Full0`, `Full1`… (their sensor, zeroed in compact mode), the compact line uses
-`StyleCompact`.
+## How style switching works
+
+**Both styles are in one file.** `rtss-overlay-preset.ovl` holds all the full overlay layers and the compact line layer
+(the last one, `compact`). Every layer has a **visibility source**: the layer is drawn only while that source is not
+zero.
+
+**Two helper sources decide** (the **Sources** menu):
+
+| Source | Formula | Equals 1 when |
+|---|---|---|
+| `StyleFull` | `(key(0x91) & 1) == 0` | the press count is even (0, 2, 4…) — the full overlay is shown |
+| `StyleCompact` | `(key(0x91) & 1) != 0` | the press count is odd (1, 3, 5…) — the compact line is shown |
+
+`key(0x91)` is a built-in RTSS function: the press counter of the key with code `0x91` (Scroll Lock). The counting is
+done by the **HotkeyHandler** plugin, so it must be enabled. `& 1` is the counter's last bit, i.e. even / odd.
+The counter tracks one key and does not see Ctrl/Alt, so a combination cannot be used. After RTSS restarts the counter
+is 0 again and the main style is shown.
+
+**Layers are bound to them:** full-style layers use `StyleFull` visibility, the compact line uses `StyleCompact`.
+Temperature cells already hid themselves when the sensor is silent, so they have their own sources `Full0`, `Full1`… —
+a copy of the sensor with the formula `(StyleFull) ? (x) : 0`: the sensor value in full style, 0 in compact.
+
+### Changing it
+
+- **Easiest** — run `install.bat` again: the hotkey window has a "Switch overlay style" item.
+- **Another key by hand:** in the `StyleFull` and `StyleCompact` formulas replace `0x91` with the code of your key:
+
+  | Key | Code | | Key | Code |
+  |---|---|---|---|---|
+  | Scroll Lock | `0x91` | | Insert | `0x2D` |
+  | Pause | `0x13` | | Home | `0x24` |
+  | F12 | `0x7B` | | Num 0 … Num 9 | `0x60` … `0x69` |
+
+  The rest are in Microsoft's
+  [Virtual-Key Codes](https://learn.microsoft.com/windows/win32/inputdev/virtual-key-codes) table.
+- **Make the compact style the main one:** swap `== 0` and `!= 0` in these two formulas
+  (or install with `install.bat -Style Compact`).
+- **Your own layer** for one style only: set its visibility source to `StyleFull` or `StyleCompact`.
+
+> Running `install.bat` again rebuilds the file and overwrites manual edits — keep your version under another name.
+
+## Frame generation
+
+With frame generation RTSS counts the generated frames too. The game's real FPS comes from **PresentMon** (bundled with
+RTSS, started automatically when the overlay needs its data):
+
+| Source | Formula | Meaning |
+|---|---|---|
+| `CPUFrametime` | PresentMon | time between the starts of the game's own frames, ms — generated frames do not affect it |
+| `NativeFPS` | `1000/CPUFrametime` | the game's real FPS |
+| `TotalFPS` | the larger of `FramerateDisplayed` and `FrameratePresented` | FPS with generation |
+| `IsFG` | `(NativeFPS >= 10) ? (TotalFPS >= NativeFPS * 1.5) : 0` | 1 — frame generation is on |
+
+In layer text: `<IF IsFG>…<ELSE>…<IF>`. Full overlay: the big number is `NativeFPS`, the caption above the graph is
+`Native Framerate  FG 120`. Compact line: `FPS 60 FG 120 ↓… ↑…`. The `1.5` ratio and the `10` FPS minimum can be
+changed in the `IsFG` formula.
 
 ## Data added by this preset
 
