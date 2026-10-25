@@ -1,11 +1,11 @@
 ﻿# RTSS Overlay Preset — установщик.
 # Запуск: install.bat (сам попросит права администратора).
-# Параметры: -Lang ru|en, -Font Unispace|Bahnschrift, -Style Full|Compact, -Defaults (горячие клавиши без вопросов),
-#            -NoRestart
+# Параметры: -Lang ru|en, -Font Unispace|Bahnschrift, -Style Full|Compact (какой оверлей основной, по умолчанию Full),
+#            -Defaults (горячие клавиши без вопросов), -NoRestart
 param(
     [ValidateSet('', 'ru', 'en')][string]$Lang = '',
     [ValidateSet('', 'Unispace', 'Bahnschrift')][string]$Font = '',
-    [ValidateSet('', 'Full', 'Compact')][string]$Style = '',
+    [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
     [switch]$Defaults,
     [switch]$NoRestart
 )
@@ -58,13 +58,6 @@ try {
         Say '  1 - Unispace'
         Say '  2 - Bahnschrift'
         $Font = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Bahnschrift' } else { 'Unispace' }
-    }
-    if (-not $Style) {
-        Say ''
-        Say (T 'Вид оверлея (ставятся оба, включается выбранный):' 'Overlay style (both are installed, the chosen one is enabled):') -Color Cyan
-        Say (T '  1 - большой, в стиле i2HARD' '  1 - full, i2HARD style')
-        Say (T '  2 - компактная строка, в стиле Steam' '  2 - compact single line, Steam style')
-        $Style = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Compact' } else { 'Full' }
     }
 
     # бэкап до любых изменений
@@ -146,7 +139,7 @@ try {
     if (-not $NoRestart) { Start-Rtss $rtss.Dir }
     Say ''
     Say (T "Готово. Оверлей включён: $layout, шрифт $Font. Журнал: $LogFile" "Done. The overlay is enabled: $layout, font $Font. Log: $LogFile") -Color Green
-    Say (T 'Другой вид: RTSS → Setup → Плагины → OverlayEditor → Настроить → Оверлеи → Загрузить' 'Other style: RTSS → Setup → Plugins → OverlayEditor → Setup → Layouts → Load')
+    Say (T 'Установлены оба оверлея — большой и компактная строка; переключаются горячими клавишами (см. выше).' 'Both overlays are installed — full and compact line; switch between them with the hotkeys above.')
     Say (T 'Удалить и вернуть как было: uninstall.bat' 'To remove and restore: uninstall.bat')
 }
 catch {

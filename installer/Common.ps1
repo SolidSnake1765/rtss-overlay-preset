@@ -225,11 +225,26 @@ function Read-HotkeyText([int]$Current) {
 
 function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
     $cfg = Join-Path $RtssDir 'Plugins\Client\HotkeyHandler.cfg'
+    function Read-Cfg([string]$Key) {
+        $line = if (Test-Path $cfg) { Select-String -Path $cfg -Pattern "^$Key=(.*)$" | Select-Object -First 1 } else { $null }
+        if ($line) { $line.Matches[0].Groups[1].Value.Trim() } else { '' }
+    }
     function Current([string]$Key, [int]$Fallback) {
-        $line = if (Test-Path $cfg) { Select-String -Path $cfg -Pattern "^$Key=([0-9A-Fa-f]+)" | Select-Object -First 1 } else { $null }
-        $v = if ($line) { [Convert]::ToInt32($line.Matches[0].Groups[1].Value, 16) } else { 0 }
+        $v = Read-Cfg $Key
+        $v = if ($v -match '^[0-9A-Fa-f]+$') { [Convert]::ToInt32($v, 16) } else { 0 }
         if ($v) { $v } else { $Fallback }
     }
+    # Переключение оверлеев: «программируемые модификаторы» HotkeyHandler (OVM1..4) с командой Load <файл>.
+    # Слот: тот, что уже грузит этот файл, иначе первый свободный — чужие настройки не трогаем.
+    $script:OvmTaken = @()
+    function Get-OvmSlot([string]$File) {
+        foreach ($n in 1..4) { if ((Read-Cfg "OVM${n}Message") -eq 'Load' -and (Read-Cfg "OVM${n}Params") -eq $File) { $script:OvmTaken += $n; return $n } }
+        foreach ($n in 1..4) {
+            if ($n -notin $script:OvmTaken -and -not (Read-Cfg "OVM${n}Message") -and -not (Current "OVM${n}Hotkey" 0)) { $script:OvmTaken += $n; return $n }
+        }
+        return 0
+    }
+    $ovm = [ordered]@{ 'rtss-overlay-preset.ovl' = (Get-OvmSlot 'rtss-overlay-preset.ovl'); 'rtss-overlay-preset-compact.ovl' = (Get-OvmSlot 'rtss-overlay-preset-compact.ovl') }
     $items = @(
         @{ Key = 'OSDToggleHotkey'; Default = 0x00060060
            Title = (T 'Показать / скрыть оверлей' 'Show / hide the overlay')
@@ -241,6 +256,19 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
            Title = (T 'Скриншот' 'Screenshot')
            Help  = (T 'Снимок экрана игры вместе с оверлеем.' 'Captures the game screen together with the overlay.') }
     )
+    if ($ovm['rtss-overlay-preset.ovl']) {
+        $items += @{ Key = "OVM$($ovm['rtss-overlay-preset.ovl'])Hotkey"; Default = 0x00060063; File = 'rtss-overlay-preset.ovl'
+           Title = (T 'Большой оверлей' 'Full overlay')
+           Help  = (T 'Переключает на большой оверлей (в стиле i2HARD).' 'Switches to the full overlay (i2HARD style).') }
+    }
+    if ($ovm['rtss-overlay-preset-compact.ovl']) {
+        $items += @{ Key = "OVM$($ovm['rtss-overlay-preset-compact.ovl'])Hotkey"; Default = 0x00060064; File = 'rtss-overlay-preset-compact.ovl'
+           Title = (T 'Компактный оверлей' 'Compact overlay')
+           Help  = (T 'Переключает на компактную строку (в стиле Steam). После перезапуска RTSS включается тот вид, что выбран основным.' 'Switches to the compact line (Steam style). After RTSS restarts, the main style is enabled again.') }
+    }
+    if (-not $ovm['rtss-overlay-preset.ovl'] -or -not $ovm['rtss-overlay-preset-compact.ovl']) {
+        Warn (T '  Все 4 программируемых модификатора HotkeyHandler заняты — клавиши переключения оверлеев не назначены.' '  All 4 HotkeyHandler programmable modifiers are in use — overlay switching hotkeys are not assigned.')
+    }
     $values = @($items | ForEach-Object { Current $_.Key $_.Default })
     Say ''
     Say (T 'Горячие клавиши' 'Hotkeys') -Color Cyan
@@ -263,6 +291,13 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
         Say ("    {0}" -f (Format-Hotkey $values[$n])) -Color Green
         Say "    $($items[$n].Help)" -Color DarkGray
         Set-IniValue $cfg 'Settings' $items[$n].Key ('{0:X8}' -f $values[$n])
+        if ($items[$n].File) {
+            $slot = $items[$n].Key -replace 'Hotkey$'
+            Set-IniValue $cfg 'Settings' "${slot}Desc" $items[$n].Title
+            Set-IniValue $cfg 'Settings' "${slot}Message" 'Load'
+            Set-IniValue $cfg 'Settings' "${slot}Layer" ''
+            Set-IniValue $cfg 'Settings' "${slot}Params" $items[$n].File
+        }
     }
 
     # скриншоты: формат и папка, если не настроены

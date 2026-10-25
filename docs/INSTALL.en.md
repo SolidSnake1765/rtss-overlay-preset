@@ -13,8 +13,8 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 3. Answer the questions:
    - installer **language** — Russian or English;
    - **font** — `1` Unispace or `2` Bahnschrift;
-   - **style** — `1` full (i2HARD style) or `2` compact single line (Steam style); both are installed, the chosen one is enabled;
    - **hotkeys** — a window opens: click a field and press the combination, "Clear" leaves it unassigned.
+   Both overlay styles are installed — full and the compact line; switch between them with hotkeys.
 4. Wait for "Done". RTSS restarts with the overlay.
 
 ### What the installer does
@@ -50,6 +50,12 @@ Everything else (frame limiter, Reflex, stealth mode, application detection) is 
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off |
 | Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. RTSS counts them from game start, so loading screens, cutscenes and menus drag them down. Press it after the level loads — the statistics restart from gameplay only |
 | Screenshot | Ctrl+Alt+Num 2 | screen capture with the overlay into `Pictures\RTSS Screenshots` (PNG) |
+| Full overlay | Ctrl+Alt+Num 3 | switches to the full overlay |
+| Compact overlay | Ctrl+Alt+Num 4 | switches to the compact Steam-style line |
+
+Overlay switching uses HotkeyHandler "programmable overlay modifiers" (the `Load` command with a file name): the
+installer takes two free ones out of four and leaves yours alone. After RTSS restarts, the main style is enabled —
+the full one; to make the compact line the main one: `install.bat -Style Compact`.
 
 To change them later: RTSS → **Setup** → **Plugins** → **HotkeyHandler.dll** → **Setup**, or simply run
 `install.bat` again.
@@ -71,9 +77,6 @@ For **NVIDIA RTX 20 / 30 / 40 / 50** cards we recommend [NV-UV](https://github.c
   (with the old WinRing0 driver that antiviruses block).
 - **Uninstall:** `uninstall.bat` restores RTSS (and Afterburner) files and settings to their state before the first
   install. The PawnIO driver stays (other programs use it too); remove it in "Settings → Apps" if you want.
-
-**Switch style** without reinstalling: RTSS → **Setup** → **Plugins** → OverlayEditor → **Setup** →
-**Layouts → Load** → `rtss-overlay-preset.ovl` or `rtss-overlay-preset-compact.ovl`.
 
 Unattended: `install.bat -Lang en -Font Bahnschrift -Style Compact -Defaults`.
 
