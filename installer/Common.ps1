@@ -236,7 +236,7 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
            Help  = (T 'Включает и выключает оверлей в игре.' 'Turns the overlay on and off in game.') },
         @{ Key = 'BenchmarkBeginHotkey'; Default = 0x00060061
            Title = (T 'Сброс статистики FPS' 'Reset FPS statistics')
-           Help  = (T 'Средний FPS, 1% и 0.1% low считаются с момента запуска игры. Загрузки, ролики и меню их портят — нажмите после загрузки уровня, и статистика начнётся заново, только по геймплею.' 'Average FPS, 1% and 0.1% low are counted from game start. Loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only.') },
+           Help  = (T 'Средний FPS, 1% и 0.1% low считаются с момента запуска игры. Загрузки, ролики и меню их портят — нажмите после загрузки уровня, и статистика начнётся заново, только по геймплею. Первые секунды после сброса 1% и 0.1% показывают 0 — это нормально, данные набираются.' 'Average FPS, 1% and 0.1% low are counted from game start. Loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only. For the first seconds after a reset 1% and 0.1% show 0 — that is normal, data is being collected.') },
         @{ Key = 'ScreenCaptureHotkey'; Default = 0x00060062
            Title = (T 'Скриншот' 'Screenshot')
            Help  = (T 'Снимок экрана игры вместе с оверлеем.' 'Captures the game screen together with the overlay.') }

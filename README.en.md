@@ -44,7 +44,7 @@ Assigned during the install — just press the combination you want.
 | Action | Default | What it does |
 |---|---|---|
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off in game |
-| Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. They are counted from game start, and loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only |
+| Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. They are counted from game start, and loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only. For the first seconds after a reset 1% and 0.1% show 0 — that is normal |
 | Screenshot | Ctrl+Alt+Num 2 | captures the screen with the overlay into `Pictures\RTSS Screenshots` |
 
 ## MSI Afterburner
