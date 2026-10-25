@@ -1,0 +1,3 @@
+# personal hardware reports (Detect.ps1 -Export)
+installer/hardware-report.json
+*.log

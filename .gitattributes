@@ -1,0 +1,10 @@
+# Скрипты и пресет храним байт в байт с CRLF: cmd и Read-Ovl рассчитаны на CRLF, а Download ZIP отдаёт как есть
+* text=auto
+*.bat -text
+*.cmd -text
+*.ps1 -text
+*.ovl -text
+*.dll binary
+*.exe binary
+*.bin binary
+*.png binary
