@@ -8,7 +8,7 @@ load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself 
 > **Inspired by [i2HARD](https://www.youtube.com/@i2hard)** — this is how they set up the overlay in their hardware tests. Not an
 > official i2HARD project, just a preset in their style, made with respect for their work.
 
-![Overlay](docs/images/overlay.png)
+<img src="docs/images/overlay.png" width="560" alt="Overlay">
 
 ## Highlights
 
