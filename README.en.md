@@ -10,7 +10,7 @@ load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself 
 
 | In game (Uncharted, Vulkan, 2560×1440, Bahnschrift font) | In the RTSS overlay editor |
 |:---:|:---:|
-| <img src="docs/images/in-game.jpg" alt="Overlay in game"> | <img src="docs/images/overlay.png" alt="Overlay in the RTSS editor"> |
+| <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Overlay in the RTSS editor"> |
 
 ## Highlights
 

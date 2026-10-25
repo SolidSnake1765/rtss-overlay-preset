@@ -10,7 +10,7 @@
 
 | В игре (Uncharted, Vulkan, 2560×1440, шрифт Bahnschrift) | В редакторе оверлея RTSS |
 |:---:|:---:|
-| <img src="docs/images/in-game.jpg" alt="Оверлей в игре"> | <img src="docs/images/overlay.png" alt="Оверлей в редакторе RTSS"> |
+| <img src="docs/images/in-game.jpg" width="400" alt="Оверлей в игре"> | <img src="docs/images/overlay.png" width="400" alt="Оверлей в редакторе RTSS"> |
 
 ## Главное
 
