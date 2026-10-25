@@ -1,9 +1,11 @@
 ﻿# RTSS Overlay Preset — установщик.
 # Запуск: install.bat (сам попросит права администратора).
-# Параметры: -Lang ru|en, -Font Unispace|Bahnschrift, -Defaults (горячие клавиши без вопросов), -NoRestart
+# Параметры: -Lang ru|en, -Font Unispace|Bahnschrift, -Style Full|Compact, -Defaults (горячие клавиши без вопросов),
+#            -NoRestart
 param(
     [ValidateSet('', 'ru', 'en')][string]$Lang = '',
     [ValidateSet('', 'Unispace', 'Bahnschrift')][string]$Font = '',
+    [ValidateSet('', 'Full', 'Compact')][string]$Style = '',
     [switch]$Defaults,
     [switch]$NoRestart
 )
@@ -22,6 +24,7 @@ $RU = $true
 
 . (Join-Path $PSScriptRoot 'Detect.ps1')
 . (Join-Path $PSScriptRoot 'Build-Overlay.ps1')
+. (Join-Path $PSScriptRoot 'Build-Compact.ps1')
 . (Join-Path $PSScriptRoot 'Common.ps1')
 
 # ранние версии пресета хранили бэкапы в %ProgramData%\I2HARD-Overlay — переносим, чтобы uninstall их видел
@@ -56,11 +59,19 @@ try {
         Say '  2 - Bahnschrift'
         $Font = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Bahnschrift' } else { 'Unispace' }
     }
+    if (-not $Style) {
+        Say ''
+        Say (T 'Вид оверлея (ставятся оба, включается выбранный):' 'Overlay style (both are installed, the chosen one is enabled):') -Color Cyan
+        Say (T '  1 - большой, в стиле i2HARD' '  1 - full, i2HARD style')
+        Say (T '  2 - компактная строка, в стиле Steam' '  2 - compact single line, Steam style')
+        $Style = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Compact' } else { 'Full' }
+    }
 
     # бэкап до любых изменений
     New-Item -ItemType Directory -Force $BackupDir | Out-Null
     Copy-Item $lhmDir (Join-Path $BackupDir 'LHMDataProvider') -Recurse
-    foreach ($f in 'Plugins\Client\OverlayEditor.cfg', 'Plugins\Client\HotkeyHandler.cfg', 'Plugins\Client\Overlays\rtss-overlay-preset.ovl', 'Plugins\Client\Overlays\I2HARD.ovl', 'Profiles\Config', 'Profiles\Global') {
+    foreach ($f in 'Plugins\Client\OverlayEditor.cfg', 'Plugins\Client\HotkeyHandler.cfg', 'Plugins\Client\Overlays\rtss-overlay-preset.ovl', 'Plugins\Client\Overlays\I2HARD.ovl',
+               'Plugins\Client\Overlays\rtss-overlay-preset-compact.ovl', 'Plugins\Client\Overlays\rtss-overlay-preset-icons.png', 'Profiles\Config', 'Profiles\Global') {
         $src = Join-Path $rtss.Dir $f
         if (Test-Path $src) {
             $dst = Join-Path $BackupDir $f
@@ -68,7 +79,7 @@ try {
             Copy-Item $src $dst
         }
     }
-    [pscustomobject]@{ RtssDir = $rtss.Dir; Date = $Stamp; Font = $Font } | ConvertTo-Json | Set-Content (Join-Path $BackupDir 'backup.json') -Encoding UTF8
+    [pscustomobject]@{ RtssDir = $rtss.Dir; Date = $Stamp; Font = $Font; Style = $Style } | ConvertTo-Json | Set-Content (Join-Path $BackupDir 'backup.json') -Encoding UTF8
 
     Set-Hotkeys $rtss.Dir -Defaults:$Defaults
     Say ''
@@ -109,9 +120,14 @@ try {
     $ovlFile = Join-Path $rtss.Dir 'Plugins\Client\Overlays\rtss-overlay-preset.ovl'
     $legacyOvl = Join-Path $rtss.Dir 'Plugins\Client\Overlays\I2HARD.ovl'      # файл ранних версий пресета (он в бэкапе)
     if (Test-Path $legacyOvl) { Remove-Item $legacyOvl -Force }
-    $log = Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $report @{ Font = $Font; HasTimings = [bool]$probe.HasTimings } $ovlFile
+    $log = @(Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $report @{ Font = $Font; HasTimings = [bool]$probe.HasTimings } $ovlFile)
+    # компактная строка в стиле Steam + картинка со стрелками ↓↑ для неё
+    $compactFile = Join-Path $rtss.Dir 'Plugins\Client\Overlays\rtss-overlay-preset-compact.ovl'
+    $log += @(Build-CompactOverlay $report @{ Font = $Font } $compactFile)
+    Copy-Item (Join-Path $Root 'overlay\rtss-overlay-preset-icons.png') (Split-Path $compactFile) -Force
     foreach ($l in $log) { Say "  - $l" }
-    Set-IniValue (Join-Path $rtss.Dir 'Plugins\Client\OverlayEditor.cfg') 'Settings' 'Layout' 'rtss-overlay-preset.ovl'
+    $layout = if ($Style -eq 'Compact') { 'rtss-overlay-preset-compact.ovl' } else { 'rtss-overlay-preset.ovl' }
+    Set-IniValue (Join-Path $rtss.Dir 'Plugins\Client\OverlayEditor.cfg') 'Settings' 'Layout' $layout
 
     # 7. Настройки RTSS ------------------------------------------------------------------------------
     Set-RtssRequiredSettings $rtss.Dir
@@ -129,7 +145,8 @@ try {
     # 9. Запуск --------------------------------------------------------------------------------------
     if (-not $NoRestart) { Start-Rtss $rtss.Dir }
     Say ''
-    Say (T "Готово. Оверлей включён (шрифт $Font). Журнал: $LogFile" "Done. The overlay is enabled (font $Font). Log: $LogFile") -Color Green
+    Say (T "Готово. Оверлей включён: $layout, шрифт $Font. Журнал: $LogFile" "Done. The overlay is enabled: $layout, font $Font. Log: $LogFile") -Color Green
+    Say (T 'Другой вид: RTSS → Setup → Плагины → OverlayEditor → Настроить → Оверлеи → Загрузить' 'Other style: RTSS → Setup → Plugins → OverlayEditor → Setup → Layouts → Load')
     Say (T 'Удалить и вернуть как было: uninstall.bat' 'To remove and restore: uninstall.bat')
 }
 catch {

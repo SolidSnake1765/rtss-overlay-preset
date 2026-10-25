@@ -4,6 +4,7 @@
 
 A ready-made monitoring overlay for **RivaTuner Statistics Server**: CPU, memory with live timings, GPU, per-thread
 load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself to your hardware.
+Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay style, with native FPS under frame generation.
 
 > **Inspired by [i2HARD](https://www.youtube.com/@i2hard)** — this is how they set up the overlay in their hardware tests. Not an
 > official i2HARD project, just a preset in their style, made with respect for their work.
@@ -11,6 +12,10 @@ load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself 
 | In game (Uncharted, Vulkan, 2560×1440, Bahnschrift font) | In the RTSS overlay editor |
 |:---:|:---:|
 | <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Overlay in the RTSS editor"> |
+
+**Compact line** in the style of Steam Performance Monitor:
+
+<img src="docs/images/compact.png" alt="Compact Steam-style overlay">
 
 ## Highlights
 
@@ -23,6 +28,9 @@ load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself 
 - **Nothing overflows its box** — even 1000+ FPS, 28000 MHz memory clock or 100 °C.
 - **Warning colors:** overheating and low FPS turn yellow and red.
 - **Two fonts:** Unispace (classic) and Bahnschrift.
+- **Two styles:** full and a compact Steam-style line. Both are installed; the installer asks which one to enable.
+- **Native FPS under frame generation** (compact style): like Steam, it shows the game's real frame rate and the total
+  with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
 - Installer and documentation in Russian and English.
 
 ## Install
@@ -31,7 +39,7 @@ load, FPS / 1% / 0.1% low / frametime. Installs with one file and adapts itself 
    MSI Afterburner is not needed.
 2. Download the archive (**Code → Download ZIP** or the latest release) and unpack it.
 3. Run **`install.bat`** and confirm the administrator prompt.
-4. Pick the language, font and hotkeys — the installer does the rest.
+4. Pick the language, font, overlay style and hotkeys — the installer does the rest.
 
 Details, including a **manual install** without the installer: [docs/INSTALL.en.md](docs/INSTALL.en.md).
 **Customizing the overlay:** [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md).
@@ -69,6 +77,20 @@ instead of Afterburner.
 | Threads | load of every thread (P- and E-cores as separate blocks) |
 | GPU | clock, fan speed, temperature, memory clock / used / temperature, voltage, power, Hot Spot, load |
 | FPS | average, 1% and 0.1% low, current, FPS and frametime graphs, API, resolution |
+
+Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busiest thread` · per-thread load · CPU temperature ·
+`average/↑max clock` · `GPU load, temperature, VRAM used/total` · `RAM used/total`.
+
+### Frame generation
+
+With frame generation RTSS shows the total FPS, not the real one: "120 FPS" with DLSS FG is 60 game frames plus
+60 generated. Like the Steam overlay, the compact style tells them apart using **PresentMon** (bundled with RTSS and
+started automatically): it takes the time between the starts of the game's own frames, which generated frames do not
+affect. When the total FPS is 1.5× the real one or more, the line becomes `FPS 60 FG 120 ↓… ↑…` — the game's real FPS
+first, then the total.
+
+Tested without frame generation; not yet tested with DLSS FG, FSR FG or AFMF — if the numbers look wrong, please open
+an [issue](../../issues).
 
 ### Supported hardware
 

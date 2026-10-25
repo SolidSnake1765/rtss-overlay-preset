@@ -13,6 +13,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 3. Answer the questions:
    - installer **language** — Russian or English;
    - **font** — `1` Unispace or `2` Bahnschrift;
+   - **style** — `1` full (i2HARD style) or `2` compact single line (Steam style); both are installed, the chosen one is enabled;
    - **hotkeys** — a window opens: click a field and press the combination, "Clear" leaves it unassigned.
 4. Wait for "Done". RTSS restarts with the overlay.
 
@@ -25,7 +26,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 | PawnIO driver | installed silently if missing (needed for motherboard, CPU and memory timing sensors) |
 | Files | into `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, PawnIO modules |
 | Hardware | CPU, GPU, motherboard, memory; every sensor is matched by name, no hardcoded indexes |
-| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl`, built for your PC |
+| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` (full) and `rtss-overlay-preset-compact.ovl` (compact) + `rtss-overlay-preset-icons.png` (its ↓↑ arrows), built for your PC |
 | RTSS settings | see below |
 | MSI Afterburner | if its own OSD is enabled, only that is turned off |
 
@@ -71,7 +72,10 @@ For **NVIDIA RTX 20 / 30 / 40 / 50** cards we recommend [NV-UV](https://github.c
 - **Uninstall:** `uninstall.bat` restores RTSS (and Afterburner) files and settings to their state before the first
   install. The PawnIO driver stays (other programs use it too); remove it in "Settings → Apps" if you want.
 
-Unattended: `install.bat -Lang en -Font Bahnschrift -Defaults`.
+**Switch style** without reinstalling: RTSS → **Setup** → **Plugins** → OverlayEditor → **Setup** →
+**Layouts → Load** → `rtss-overlay-preset.ovl` or `rtss-overlay-preset-compact.ovl`.
+
+Unattended: `install.bat -Lang en -Font Bahnschrift -Style Compact -Defaults`.
 
 ## Manual
 
@@ -91,6 +95,8 @@ The same steps by hand.
    ```
    This creates `Documents\rtss-overlay-preset.ovl`. The script changes nothing in the system, it only reads sensors.
    Copy the file into `RTSS\Plugins\Client\Overlays\`.
+   For the compact line run the same script with `-Style Compact`: it creates `rtss-overlay-preset-compact.ovl` and
+   `rtss-overlay-preset-icons.png` — copy **both** files.
 5. **Enable the overlay:** start RTSS → **Setup** → **Plugins** tab → tick **OverlayEditor.dll** and
    **HotkeyHandler.dll** → select OverlayEditor → **Setup** → **Overlays → Load** → `rtss-overlay-preset.ovl`.
 6. **RTSS settings:** main window — **On-Screen Display rendering mode: Raster 3D**; Setup → General —

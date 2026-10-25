@@ -23,11 +23,12 @@ try {
     Get-ChildItem $lhmDir -File | Remove-Item -Force
     Copy-Item (Join-Path $backup.FullName 'LHMDataProvider\*') $lhmDir -Recurse -Force
 
-    foreach ($f in 'Plugins\Client\OverlayEditor.cfg', 'Plugins\Client\HotkeyHandler.cfg', 'Plugins\Client\Overlays\rtss-overlay-preset.ovl', 'Plugins\Client\Overlays\I2HARD.ovl', 'Profiles\Global') {
+    $ours = 'Plugins\Client\Overlays\rtss-overlay-preset.ovl', 'Plugins\Client\Overlays\rtss-overlay-preset-compact.ovl', 'Plugins\Client\Overlays\rtss-overlay-preset-icons.png'
+    foreach ($f in @('Plugins\Client\OverlayEditor.cfg', 'Plugins\Client\HotkeyHandler.cfg', 'Plugins\Client\Overlays\I2HARD.ovl', 'Profiles\Global') + $ours) {
         $saved = Join-Path $backup.FullName $f
         $target = Join-Path $rtssDir $f
         if (Test-Path $saved) { Copy-Item $saved $target -Force }
-        elseif ($f -like '*rtss-overlay-preset.ovl' -and (Test-Path $target)) { Remove-Item $target -Force }
+        elseif ($f -in $ours -and (Test-Path $target)) { Remove-Item $target -Force }    # файлы пресета, которых до установки не было
     }
 
     # настройки оверлея Afterburner — из первой копии, где они сохранены

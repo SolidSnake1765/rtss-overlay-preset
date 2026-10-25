@@ -211,6 +211,12 @@ function Resolve-Roles($Sensors, $Cpu, $Gpu) {
     $r['gpu.power']   = Find-Sensor $gpuOwn $g 'Power' '^GPU Package$', '^GPU Power$', '^GPU Total$', '^GPU Core$'
     $r['gpu.memused'] = Find-Sensor $gpuOwn $g 'SmallData' '^GPU Memory Used$', '^D3D Dedicated Memory Used$'
     $r['gpu.usage']   = Find-Sensor $gpuOwn $g 'Load' '^GPU Core$', '^D3D 3D$', '^GPU$'
+    # для компактного оверлея: объём VRAM, ОЗУ в ГБ (занято + свободно = всего), частоты всех ядер (средняя/макс.)
+    $r['gpu.memtotal']= Find-Sensor $gpuOwn $g 'SmallData' '^GPU Memory Total$', '^D3D Dedicated Memory Total$'
+    $ram = @($Sensors | Where-Object HwId -eq '/ram')          # физическая память (/vram — файл подкачки)
+    $r['ram.usedgb']  = Find-Sensor $ram 'Memory' 'Data' '^Memory Used$'
+    $r['ram.freegb']  = Find-Sensor $ram 'Memory' 'Data' '^Memory Available$'
+    $r['cpu.clocks']  = Find-Sensor $Sensors $cpuHw 'Clock' '^(P-|E-)?Core #\d+$', '^CPU Core #\d+$' -All
     return $r
 }
 

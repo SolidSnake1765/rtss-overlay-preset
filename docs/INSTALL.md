@@ -13,6 +13,7 @@ MSI Afterburner, HWiNFO и AIDA64 не нужны.
 3. Ответьте на вопросы:
    - **язык** установщика — русский или английский;
    - **шрифт** — `1` Unispace или `2` Bahnschrift;
+   - **вид** — `1` большой (в стиле i2HARD) или `2` компактная строка (в стиле Steam); ставятся оба, включается выбранный;
    - **горячие клавиши** — откроется окно: щёлкните в поле и нажмите нужное сочетание, «Очистить» — не назначать.
 4. Дождитесь «Готово». RTSS перезапустится уже с оверлеем.
 
@@ -25,7 +26,7 @@ MSI Afterburner, HWiNFO и AIDA64 не нужны.
 | Драйвер PawnIO | ставится тихо, если его нет (нужен для датчиков платы, процессора и таймингов памяти) |
 | Файлы | в `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, модули PawnIO |
 | Железо | процессор, видеокарта, плата, память; все датчики ищутся по названию, без жёстких номеров |
-| Оверлей | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl`, собранный под ваш ПК |
+| Оверлей | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` (большой) и `rtss-overlay-preset-compact.ovl` (компактный) + `rtss-overlay-preset-icons.png` (стрелки ↓↑ для него), собранные под ваш ПК |
 | Настройки RTSS | см. ниже |
 | MSI Afterburner | если в нём включён свой оверлей — выключается только он |
 
@@ -71,7 +72,10 @@ Afterburner не обязателен. Если он стоит — пользу
 - **Удаление:** `uninstall.bat` — возвращает файлы и настройки RTSS (и Afterburner) к состоянию до первой установки.
   Драйвер PawnIO остаётся (им пользуются и другие программы); удалить его можно в «Параметры → Приложения».
 
-Запуск без вопросов: `install.bat -Lang ru -Font Bahnschrift -Defaults`.
+**Сменить вид** без переустановки: RTSS → **Setup** → **Плагины** → OverlayEditor → **Настроить** →
+**Оверлеи → Загрузить** → `rtss-overlay-preset.ovl` или `rtss-overlay-preset-compact.ovl`.
+
+Запуск без вопросов: `install.bat -Lang ru -Font Bahnschrift -Style Compact -Defaults`.
 
 ## Ручная
 
@@ -91,6 +95,8 @@ Afterburner не обязателен. Если он стоит — пользу
    ```
    Появится `Документы\rtss-overlay-preset.ovl`. Скрипт ничего не меняет в системе, только читает датчики.
    Скопируйте файл в `RTSS\Plugins\Client\Overlays\`.
+   Компактная строка — тот же скрипт с `-Style Compact`: появятся `rtss-overlay-preset-compact.ovl` и
+   `rtss-overlay-preset-icons.png`, скопируйте **оба** файла.
 5. **Включите оверлей:** запустите RTSS → **Setup** → вкладка **Плагины** → поставьте галочки **OverlayEditor.dll**
    и **HotkeyHandler.dll** → выделите OverlayEditor → **Настроить** → **Оверлеи → Загрузить** → `rtss-overlay-preset.ovl`.
 6. **Настройки RTSS:** в главном окне — **On-Screen Display rendering mode: Raster 3D**; в Setup → Основные —

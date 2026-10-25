@@ -54,6 +54,14 @@ thresholds.
 | Memory modules | 50 °C | 60 °C | overclocked memory gets unstable above that |
 | FPS | < 60 | < 30 | |
 
+## Compact line
+
+`rtss-overlay-preset-compact.ovl` is a single layer: the whole line is RTSS hypertext in its **Text** field:
+`<C=RRGGBB>` — color, `<S=60>…<S>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
+arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
+`<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. Block colors: FPS `E8836B`, CPU `E5C35C`,
+GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
+
 ## Data added by this preset
 
 The preset's `Exporter.dll` adds a **Memory Timings** block to the RTSS LibreHardwareMonitor provider — you can use it
