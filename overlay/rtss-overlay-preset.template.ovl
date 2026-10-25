@@ -234,11 +234,11 @@ Name=background
 Text="    "
 PositionX=0
 PositionY=0
-ExtentX=224
+ExtentX=225
 ExtentY=225
 ExtentOrigin=4
 Size=70
-BgndColor=41000000
+BgndColor=5A000000
 [Layer2]
 Name=header
 Text={HEADER}
