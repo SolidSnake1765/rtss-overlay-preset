@@ -28,7 +28,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Nothing overflows its box** — even 1000+ FPS, 28000 MHz memory clock or 100 °C.
 - **Warning colors:** overheating and low FPS turn yellow and red.
 - **Two fonts:** Unispace (classic) and Bahnschrift.
-- **Two styles:** full and a compact Steam-style line. Both are installed at once; switch between them with hotkeys right in game.
+- **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
 - **Native FPS under frame generation** (compact style): like Steam, it shows the game's real frame rate and the total
   with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
 - Installer and documentation in Russian and English.
@@ -56,10 +56,9 @@ Assigned during the install — just press the combination you want.
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off in game |
 | Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. They are counted from game start, and loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only. For the first seconds after a reset 1% and 0.1% show 0 — that is normal |
 | Screenshot | Ctrl+Alt+Num 2 | captures the screen with the overlay into `Pictures\RTSS Screenshots` |
-| Full overlay | Ctrl+Alt+Num 3 | switches to the full overlay |
-| Compact overlay | Ctrl+Alt+Num 4 | switches to the compact Steam-style line |
+| Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
-After RTSS restarts, the main style is enabled — the full one (install with `-Style Compact` to make the compact line the main one).
+After RTSS restarts, the main style is enabled — the full one (to make the compact line main: `install.bat -Style Compact`).
 
 ## MSI Afterburner
 

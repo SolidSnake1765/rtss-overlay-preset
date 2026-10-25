@@ -57,7 +57,9 @@ function Get-TempColor([string]$Source, [int]$Warn, [int]$Crit) {
     "FFFFFF,,$Warn,$($script:Palette.Warn),$Warn,$Crit,$($script:Palette.Crit),$Crit,($Source,0)"
 }
 
-# Сборка. $Report — результат Get-HardwareReport (Detect.ps1), $Options: Font = 'Unispace'|'Bahnschrift', HasTimings = bool
+# Сборка. $Report — результат Get-HardwareReport (Detect.ps1), $Options: Font = 'Unispace'|'Bahnschrift', HasTimings = bool,
+# StyleKey — код клавиши переключения вида (0 — без переключения), MainStyle = 'Full'|'Compact' — вид после запуска RTSS.
+# В файл кладутся оба вида: большой (из шаблона) и компактная строка (Build-Compact.ps1).
 function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     $ovl = Read-Ovl $Template
     $layers  = @($ovl | Where-Object { $_.Name -like 'Layer*' })
@@ -256,6 +258,50 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     Set-Key $general 'Sources' ([string]$nSrc)
     Set-Key $general 'Layers' ([string]$nLay)
 
+    $result = Add-CompactStyle $result $Report $Options $log
     Write-Ovl $result $OutFile
     return $log
+}
+
+# Компактная строка в том же файле. Какой вид показан, решает счётчик нажатий клавиши StyleKey: key(vk) из
+# HotkeyHandler, бит 0 меняется при каждом нажатии (Ctrl/Alt не учитываются — RTSS считает нажатия одной клавиши).
+# Чётное число нажатий — основной вид, нечётное — второй. После перезапуска RTSS счётчик с нуля → основной вид.
+function Add-CompactStyle($Sections, $Report, $Options, $Log) {
+    $parts = Get-CompactParts $Report
+    foreach ($l in $parts.Log) { $Log.Add($l) }
+    $head    = @($Sections | Where-Object { $_.Name -notlike 'Source*' -and $_.Name -notlike 'Layer*' })
+    $sources = @($Sections | Where-Object { $_.Name -like 'Source*' })
+    $layers  = @($Sections | Where-Object { $_.Name -like 'Layer*' })
+
+    $key = 'key(0x{0:X2})' -f ([int]$Options.StyleKey -band 0xFF)
+    $even = "($key & 1) == 0"; $odd = "($key & 1) != 0"
+    $full, $compact = if ($Options.MainStyle -eq 'Compact') { $odd, $even } else { $even, $odd }
+    $new = New-Object System.Collections.Generic.List[object]
+    $new.Add((New-OvlSource 'StyleFull' 'HAL' 'Stub' '' '' $full))
+    $new.Add((New-OvlSource 'StyleCompact' 'HAL' 'Stub' '' '' $compact))
+
+    # слоям большого вида — видимость StyleFull; у слоёв со своей видимостью (температуры: ячейка прячется,
+    # если датчик молчит) — копия их источника, обнулённая, когда показан компактный вид
+    $n = 0
+    foreach ($l in $layers) {
+        $vis = Get-Key $l 'VisibilitySource'
+        if (-not $vis) { Set-Key $l 'VisibilitySource' 'StyleFull'; continue }
+        $src = $sources | Where-Object { (Get-Key $_ 'Name') -eq $vis } | Select-Object -Last 1
+        $f = Get-Key $src 'Formula'; if (-not $f) { $f = 'x' }
+        $new.Add((New-OvlSource "Full$n" (Get-Key $src 'Provider') (Get-Key $src 'ID') '' '' "(StyleFull) ? ($f) : 0"))
+        Set-Key $l 'VisibilitySource' "Full$n"; $n++
+    }
+    # источники компактной строки: одноимённые уже есть в большом виде — те же данные
+    $names = @($sources | ForEach-Object { Get-Key $_ 'Name' })
+    foreach ($s in $parts.Sources) { if ((Get-Key $s 'Name') -notin $names) { $new.Add($s) } }
+    foreach ($l in $parts.Layers) { Set-Key $l 'VisibilitySource' 'StyleCompact' }
+
+    $allSources = [object[]]$sources + $new.ToArray(); $allLayers = [object[]]$layers + $parts.Layers.ToArray()
+    for ($i = 0; $i -lt $allSources.Count; $i++) { $allSources[$i].Name = "Source$i" }
+    for ($i = 0; $i -lt $allLayers.Count; $i++) { $allLayers[$i].Name = "Layer$i" }
+    $general = $head | Where-Object Name -eq 'General'
+    Set-Key $general 'Sources' ([string]$allSources.Count)
+    Set-Key $general 'Layers' ([string]$allLayers.Count)
+    Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # стрелки ↓↑
+    return @($head) + $allSources + $allLayers
 }

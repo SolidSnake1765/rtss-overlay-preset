@@ -1,6 +1,7 @@
-﻿# RTSS Overlay Preset — компактный оверлей в одну строку в стиле Steam Performance Monitor.
+﻿# RTSS Overlay Preset — компактный вид в одну строку в стиле Steam Performance Monitor.
 # Строится целиком из кода (без шаблона): вся строка — один слой гипертекста, как у Steam текст идёт
-# сплошным потоком; части без датчика просто не попадают в строку. Нужен Build-Overlay.ps1 (Write-Ovl, New-OvlSource).
+# сплошным потоком; части без датчика просто не попадают в строку. Build-Overlay кладёт его в тот же .ovl,
+# что и большой вид, и переключает их клавишей (см. Add-CompactStyle в Build-Overlay.ps1).
 #
 # Генерация кадров (DLSS FG, FSR FG, AFMF, Smooth Motion): нативный FPS берётся из PresentMon (входит в RTSS) —
 # CPUFrametime — время между началами кадров самой игры, сгенерированные кадры в него не попадают.
@@ -12,7 +13,8 @@ $script:Steam = @{
     Value = 'FFFFFF'; Unit = 'A0A0A0'; Low = 'FF6B6B'; High = 'C8C8C8'; Graph = '7DC75A'
 }
 
-function Build-CompactOverlay($Report, $Options, [string]$OutFile) {
+# Возвращает @{ Sources; Layers; Log } — источники и единственный слой компактной строки
+function Get-CompactParts($Report) {
     $ids = $Report.Sensors; $cpu = $Report.Cpu; $gpu = $Report.Gpu
     $log = New-Object System.Collections.Generic.List[string]
     $sources = New-Object System.Collections.Generic.List[object]
@@ -25,7 +27,7 @@ function Build-CompactOverlay($Report, $Options, [string]$OutFile) {
     # слой в левом верхнем углу; ширина и высота — по тексту
     function Lay([string]$Text, [hashtable]$Extra = @{}) {
         $s = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
-        $kv = [ordered]@{ Name = ''; Text = $Text; PositionX = 0; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 100; TextColor = $P.Value }
+        $kv = [ordered]@{ Name = 'compact'; Text = $Text; PositionX = 0; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 80; TextColor = $P.Value }
         foreach ($k in $Extra.Keys) { $kv[$k] = $Extra[$k] }
         foreach ($k in $kv.Keys) { $s.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
         $layers.Add($s)
@@ -76,7 +78,9 @@ function Build-CompactOverlay($Report, $Options, [string]$OutFile) {
     } elseif (-not $ids.'ram.usedgb') { Src 'RamUsed' 'HAL' 'RAM usage' 'GB' '%.1f' 'x / 1024' }
 
     # --- строка: один слой гипертекста, как у Steam текст идёт сплошным потоком ----------------------
-    $u = { param($t) "<S=60><C=$($P.Unit)>$t<S><C=$($P.Value)>" }       # мелкая единица надстрочно
+    # мелкая единица надстрочно; <S=n> — в процентах от шрифта (не от Size слоя), голый <S> вернул бы 100 %,
+    # поэтому размер строки (80) восстанавливается явно
+    $u = { param($t) "<S=48><C=$($P.Unit)>$t<S=80><C=$($P.Value)>" }
     $parts = New-Object System.Collections.Generic.List[string]
     # FPS: «FPS 225 ↓28 ↑419», при генерации кадров «FPS 60 FG 120 ↓95 ↑130»
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
@@ -97,26 +101,11 @@ function Build-CompactOverlay($Report, $Options, [string]$OutFile) {
     # RAM: «RAM 21.6/31.9 GB»
     $parts.Add("<C=$($P.Ram)>RAM <C=$($P.Value)>%RamUsed%$(if (Test-SourceName $sources 'RamTotal') { '/%RamTotal%' })$(& $u 'GB')")
 
-    # Size=100: тег <S> после мелкой единицы возвращает 100 %, а не размер слоя — размер задаёт сам шрифт
     Lay ($parts -join '  ') @{ BgndColor = 'A0101010'; MarginLeft = 3; MarginTop = 1; MarginRight = 3; MarginBottom = 1 }
 
-    # --- файл ----------------------------------------------------------------------------------------
-    $ovl = New-Object System.Collections.Generic.List[object]
-    function Sec([string]$Name, [System.Collections.Specialized.OrderedDictionary]$Kv) {
-        $s = [pscustomobject]@{ Name = $Name; Keys = New-Object System.Collections.Generic.List[object] }
-        foreach ($k in $Kv.Keys) { $s.Keys.Add([pscustomobject]@{ K = $k; V = [string]$Kv[$k] }) }
-        $ovl.Add($s)
-    }
-    Sec 'Master' ([ordered]@{ Implementation = 2; FontFace = $Options.Font; FontHeight = $(if ($Options.Font -eq 'Bahnschrift') { -8 } else { -7 }); FontWeight = 700; ZoomRatio = 2 })
-    Sec 'Settings' ([ordered]@{ Name = ''; EnvVars = ''; RefreshPeriod = 500; LockUserSettings = 1; EmbeddedImage = 'rtss-overlay-preset-icons.png'; PingAddr = '' })
-    Sec 'General' ([ordered]@{ Sources = $sources.Count; Tables = 0; Layers = $layers.Count })
-    for ($i = 0; $i -lt $sources.Count; $i++) { $sources[$i].Name = "Source$i"; $ovl.Add($sources[$i]) }
-    for ($i = 0; $i -lt $layers.Count; $i++) { $layers[$i].Name = "Layer$i"; $ovl.Add($layers[$i]) }
-    # «°» и прочее — в cp1251
-    foreach ($s in $ovl) { foreach ($p in $s.Keys) { $p.V = ConvertTo-OvlText $p.V } }
-    Write-Ovl $ovl $OutFile
-    $log.Add("компактный: источников $($sources.Count)")
-    return $log
+    foreach ($x in ($sources.ToArray() + $layers.ToArray())) { foreach ($p in $x.Keys) { $p.V = ConvertTo-OvlText $p.V } }    # «°» — в cp1251
+    $log.Add("компактный вид: источников $($sources.Count)")
+    return @{ Sources = $sources; Layers = $layers; Log = $log }
 }
 
 function Test-SourceName($Sources, [string]$Name) { [bool]($Sources | Where-Object { (Get-Key $_ 'Name') -eq $Name }) }

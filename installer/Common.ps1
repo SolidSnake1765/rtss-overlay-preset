@@ -182,12 +182,14 @@ function Show-HotkeyDialog($Items, [int[]]$Values) {
         $box.ReadOnly = $true; $box.BackColor = [Drawing.Color]::White; $box.Cursor = 'Hand'
         $box.ShortcutsEnabled = $false
         $box.Tag = $Values[$i]; $box.Text = Format-Hotkey $Values[$i]
+        if ($Items[$i].Single) { $box.AccessibleName = 'single' }      # одна клавиша: Ctrl/Alt/Shift отбрасываются
         $box.SetBounds(16, $y, 400, 28)
         $box.add_PreviewKeyDown({ param($s, $e) $e.IsInputKey = $true })      # Tab, стрелки и т.п. — тоже в поле
         $box.add_KeyDown({
             param($s, $e)
             $e.SuppressKeyPress = $true; $e.Handled = $true
             $v = ConvertFrom-KeyEvent $e.KeyCode $e.Modifiers
+            if ($s.AccessibleName -eq 'single') { $v = $v -band 0xFF }
             if ($v) { $s.Tag = $v; $s.Text = Format-Hotkey $v }
         })
         $clear = New-Object Windows.Forms.Button
@@ -223,6 +225,8 @@ function Read-HotkeyText([int]$Current) {
     }
 }
 
+# Назначает горячие клавиши. Клавиша переключения вида живёт не в HotkeyHandler.cfg, а в формуле оверлея
+# (key(vk) — счётчик нажатий одной клавиши), поэтому её код возвращается в $script:StyleKey для Build-Overlay.
 function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
     $cfg = Join-Path $RtssDir 'Plugins\Client\HotkeyHandler.cfg'
     function Read-Cfg([string]$Key) {
@@ -234,17 +238,17 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
         $v = if ($v -match '^[0-9A-Fa-f]+$') { [Convert]::ToInt32($v, 16) } else { 0 }
         if ($v) { $v } else { $Fallback }
     }
-    # Переключение оверлеев: «программируемые модификаторы» HotkeyHandler (OVM1..4) с командой Load <файл>.
-    # Слот: тот, что уже грузит этот файл, иначе первый свободный — чужие настройки не трогаем.
-    $script:OvmTaken = @()
-    function Get-OvmSlot([string]$File) {
-        foreach ($n in 1..4) { if ((Read-Cfg "OVM${n}Message") -eq 'Load' -and (Read-Cfg "OVM${n}Params") -eq $File) { $script:OvmTaken += $n; return $n } }
-        foreach ($n in 1..4) {
-            if ($n -notin $script:OvmTaken -and -not (Read-Cfg "OVM${n}Message") -and -not (Current "OVM${n}Hotkey" 0)) { $script:OvmTaken += $n; return $n }
+    # текущая клавиша вида — из формулы уже установленного оверлея, иначе Scroll Lock
+    $ovl = Join-Path $RtssDir 'Plugins\Client\Overlays\rtss-overlay-preset.ovl'
+    $style = if (Test-Path $ovl) { Select-String -Path $ovl -Pattern 'key\(0x([0-9A-Fa-f]+)\)' | Select-Object -First 1 } else { $null }
+    $style = if ($style) { [Convert]::ToInt32($style.Matches[0].Groups[1].Value, 16) } else { 0x91 }
+    # версия 0.x переключала виды «программируемыми модификаторами» HotkeyHandler — убираем их
+    foreach ($n in 1..4) {
+        if ((Read-Cfg "OVM${n}Message") -eq 'Load' -and (Read-Cfg "OVM${n}Params") -like 'rtss-overlay-preset*.ovl') {
+            foreach ($k in 'Desc', 'Message', 'Layer', 'Params') { Set-IniValue $cfg 'Settings' "OVM$n$k" '' }
+            Set-IniValue $cfg 'Settings' "OVM${n}Hotkey" '00000000'
         }
-        return 0
     }
-    $ovm = [ordered]@{ 'rtss-overlay-preset.ovl' = (Get-OvmSlot 'rtss-overlay-preset.ovl'); 'rtss-overlay-preset-compact.ovl' = (Get-OvmSlot 'rtss-overlay-preset-compact.ovl') }
     $items = @(
         @{ Key = 'OSDToggleHotkey'; Default = 0x00060060
            Title = (T 'Показать / скрыть оверлей' 'Show / hide the overlay')
@@ -256,20 +260,10 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
            Title = (T 'Скриншот' 'Screenshot')
            Help  = (T 'Снимок экрана игры вместе с оверлеем.' 'Captures the game screen together with the overlay.') }
     )
-    if ($ovm['rtss-overlay-preset.ovl']) {
-        $items += @{ Key = "OVM$($ovm['rtss-overlay-preset.ovl'])Hotkey"; Default = 0x00060063; File = 'rtss-overlay-preset.ovl'
-           Title = (T 'Большой оверлей' 'Full overlay')
-           Help  = (T 'Переключает на большой оверлей (в стиле i2HARD).' 'Switches to the full overlay (i2HARD style).') }
-    }
-    if ($ovm['rtss-overlay-preset-compact.ovl']) {
-        $items += @{ Key = "OVM$($ovm['rtss-overlay-preset-compact.ovl'])Hotkey"; Default = 0x00060064; File = 'rtss-overlay-preset-compact.ovl'
-           Title = (T 'Компактный оверлей' 'Compact overlay')
-           Help  = (T 'Переключает на компактную строку (в стиле Steam). После перезапуска RTSS включается тот вид, что выбран основным.' 'Switches to the compact line (Steam style). After RTSS restarts, the main style is enabled again.') }
-    }
-    if (-not $ovm['rtss-overlay-preset.ovl'] -or -not $ovm['rtss-overlay-preset-compact.ovl']) {
-        Warn (T '  Все 4 программируемых модификатора HotkeyHandler заняты — клавиши переключения оверлеев не назначены.' '  All 4 HotkeyHandler programmable modifiers are in use — overlay switching hotkeys are not assigned.')
-    }
-    $values = @($items | ForEach-Object { Current $_.Key $_.Default })
+    $items += @{ Key = ''; Default = $style; Single = $true
+       Title = (T 'Переключить вид оверлея' 'Switch overlay style')
+       Help  = (T 'По кругу: большой → компактная строка → большой. Только одна клавиша, без Ctrl/Alt — RTSS считает нажатия одной клавиши (они действуют и в сочетаниях). Удобна та, что в играх не нужна: Scroll Lock, Pause.' 'Cycles: full → compact line → full. A single key only, no Ctrl/Alt — RTSS counts presses of one key (presses inside combinations count too). Pick one games do not use: Scroll Lock, Pause.') }
+    $values = @($items | ForEach-Object { if ($_.Single) { $_.Default } else { Current $_.Key $_.Default } })
     Say ''
     Say (T 'Горячие клавиши' 'Hotkeys') -Color Cyan
     if (-not $Defaults) {
@@ -282,6 +276,7 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
             for ($n = 0; $n -lt $items.Count; $n++) {
                 Say "  $($items[$n].Title)"
                 $values[$n] = Read-HotkeyText $values[$n]
+                if ($items[$n].Single) { $values[$n] = $values[$n] -band 0xFF }
             }
         }
     }
@@ -290,14 +285,8 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
         Say "  $($items[$n].Title): " -Color White
         Say ("    {0}" -f (Format-Hotkey $values[$n])) -Color Green
         Say "    $($items[$n].Help)" -Color DarkGray
-        Set-IniValue $cfg 'Settings' $items[$n].Key ('{0:X8}' -f $values[$n])
-        if ($items[$n].File) {
-            $slot = $items[$n].Key -replace 'Hotkey$'
-            Set-IniValue $cfg 'Settings' "${slot}Desc" $items[$n].Title
-            Set-IniValue $cfg 'Settings' "${slot}Message" 'Load'
-            Set-IniValue $cfg 'Settings' "${slot}Layer" ''
-            Set-IniValue $cfg 'Settings' "${slot}Params" $items[$n].File
-        }
+        if ($items[$n].Single) { $script:StyleKey = $values[$n] -band 0xFF }
+        else { Set-IniValue $cfg 'Settings' $items[$n].Key ('{0:X8}' -f $values[$n]) }
     }
 
     # скриншоты: формат и папка, если не настроены

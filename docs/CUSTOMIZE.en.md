@@ -56,11 +56,16 @@ thresholds.
 
 ## Compact line
 
-`rtss-overlay-preset-compact.ovl` is a single layer: the whole line is RTSS hypertext in its **Text** field:
-`<C=RRGGBB>` — color, `<S=60>…<S>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
+The compact line is the file's last layer (`compact`): the whole line is RTSS hypertext in its **Text** field:
+`<C=RRGGBB>` — color, `<S=48>…<S=80>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
 arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
 `<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. Block colors: FPS `E8836B`, CPU `E5C35C`,
 GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
+
+Which style is shown is decided by the `StyleFull` and `StyleCompact` sources: the formula `(key(0x91) & 1) == 0`
+means an even number of Scroll Lock presses (0x91 is the key code). Full-style layers use the `StyleFull` visibility,
+the temperature layers use `Full0`, `Full1`… (their sensor, zeroed in compact mode), the compact line uses
+`StyleCompact`.
 
 ## Data added by this preset
 

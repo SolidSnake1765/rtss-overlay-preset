@@ -14,7 +14,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
    - installer **language** — Russian or English;
    - **font** — `1` Unispace or `2` Bahnschrift;
    - **hotkeys** — a window opens: click a field and press the combination, "Clear" leaves it unassigned.
-   Both overlay styles are installed — full and the compact line; switch between them with hotkeys.
+   Both overlay styles are installed — full and the compact line; one key cycles between them.
 4. Wait for "Done". RTSS restarts with the overlay.
 
 ### What the installer does
@@ -26,7 +26,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 | PawnIO driver | installed silently if missing (needed for motherboard, CPU and memory timing sensors) |
 | Files | into `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, PawnIO modules |
 | Hardware | CPU, GPU, motherboard, memory; every sensor is matched by name, no hardcoded indexes |
-| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` (full) and `rtss-overlay-preset-compact.ovl` (compact) + `rtss-overlay-preset-icons.png` (its ↓↑ arrows), built for your PC |
+| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` — both styles in one file, built for your PC, + `rtss-overlay-preset-icons.png` (the compact line's ↓↑ arrows) |
 | RTSS settings | see below |
 | MSI Afterburner | if its own OSD is enabled, only that is turned off |
 
@@ -50,12 +50,12 @@ Everything else (frame limiter, Reflex, stealth mode, application detection) is 
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off |
 | Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. RTSS counts them from game start, so loading screens, cutscenes and menus drag them down. Press it after the level loads — the statistics restart from gameplay only |
 | Screenshot | Ctrl+Alt+Num 2 | screen capture with the overlay into `Pictures\RTSS Screenshots` (PNG) |
-| Full overlay | Ctrl+Alt+Num 3 | switches to the full overlay |
-| Compact overlay | Ctrl+Alt+Num 4 | switches to the compact Steam-style line |
+| Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
-Overlay switching uses HotkeyHandler "programmable overlay modifiers" (the `Load` command with a file name): the
-installer takes two free ones out of four and leaves yours alone. After RTSS restarts, the main style is enabled —
-the full one; to make the compact line the main one: `install.bat -Style Compact`.
+Both styles live in one file, and which one is shown is decided by the `key()` formula — a key press counter kept by
+the HotkeyHandler plugin (so it must be enabled). The counter tracks a single key and does not see Ctrl/Alt, so a
+combination cannot be used here. After RTSS restarts, the main style is enabled — the full one; to make the compact
+line main: `install.bat -Style Compact`.
 
 To change them later: RTSS → **Setup** → **Plugins** → **HotkeyHandler.dll** → **Setup**, or simply run
 `install.bat` again.
@@ -98,8 +98,9 @@ The same steps by hand.
    ```
    This creates `Documents\rtss-overlay-preset.ovl`. The script changes nothing in the system, it only reads sensors.
    Copy the file into `RTSS\Plugins\Client\Overlays\`.
-   For the compact line run the same script with `-Style Compact`: it creates `rtss-overlay-preset-compact.ovl` and
-   `rtss-overlay-preset-icons.png` — copy **both** files.
+   It also creates `rtss-overlay-preset-icons.png` (the compact line's arrows) — copy **both** files.
+   The file holds both styles; `-Style Compact` shows the compact line first, `-Key 0x13` switches with Pause instead
+   of Scroll Lock (a Windows virtual key code).
 5. **Enable the overlay:** start RTSS → **Setup** → **Plugins** tab → tick **OverlayEditor.dll** and
    **HotkeyHandler.dll** → select OverlayEditor → **Setup** → **Overlays → Load** → `rtss-overlay-preset.ovl`.
 6. **RTSS settings:** main window — **On-Screen Display rendering mode: Raster 3D**; Setup → General —
