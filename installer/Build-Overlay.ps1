@@ -209,11 +209,12 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     Set-Key (Layer 'ft.graph') 'TextColor' 'FFFFFF'
 
     # --- генерация кадров -------------------------------------------------------------------------
-    # RTSS считает и сгенерированные кадры. При генерации (IsFG — источники PresentMon, их добавляет Add-CompactStyle)
-    # крупное число — реальный FPS игры, а итоговый с генерацией — в подписи над графиком: «Native Framerate  FG 120».
+    # RTSS считает и сгенерированные кадры. При генерации (IsFG и др. — источники из Get-CompactParts, Build-Compact.ps1)
+    # крупное число — реальный FPS игры, а итоговый с генерацией — в подписи над графиком: «Native Framerate  FG 120»;
+    # «FG~» — генерация внутри игры, реальный FPS оценён как итоговый пополам
     Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
     $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
-    Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG %TotalFPS%<ELSE>Current Framerate<IF>'
+    Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox>~<IF IsFG> %TotalFPS%<ELSE>Current Framerate<IF>'
     # GPU Usage: залитая область цвета вендора видеокарты, шкала фиксированная 0..100 % — высота сразу читается
     # как загрузка (автомасштаб тут вреден: 20 % растягивались бы на всю высоту)
     Set-Key (Layer 'gpu.usage.graph') 'Text' '<G=GPU1 usage,0,0,-1,0,100,1>'
@@ -310,5 +311,14 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
     Set-Key $general 'Sources' ([string]$allSources.Count)
     Set-Key $general 'Layers' ([string]$allLayers.Count)
     Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # стрелки ↓↑
+    if ($Options.FgDebug) {
+        # отладка генерации кадров: сырые признаки справа от оверлея (Make-Overlay -FgDebug)
+        $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'
+            Text = 'lib %FgLib% alt %GpuAlt% ratio %GpuAltRatio% gpu %GpuActive%  pres %FrameratePresented% disp %FramerateDisplayed% drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG% ~%IsFGApprox% native %NativeFPS%' }
+        $dbg = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
+        foreach ($k in $kv.Keys) { $dbg.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
+        $allLayers += $dbg; $dbg.Name = "Layer$($allLayers.Count - 1)"
+        Set-Key $general 'Layers' ([string]$allLayers.Count)
+    }
     return @($head) + $allSources + $allLayers
 }

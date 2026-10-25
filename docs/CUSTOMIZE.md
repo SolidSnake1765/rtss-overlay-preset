@@ -104,24 +104,34 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 
 ## Генерация кадров
 
-С генерацией кадров RTSS считает и сгенерированные кадры. Реальный FPS игры берётся из **PresentMon** (входит в RTSS,
-запускается сам, когда оверлею нужны его данные):
+С генерацией кадров RTSS считает и сгенерированные кадры. Источники (меню **Источники**):
 
 | Источник | Формула | Что это |
 |---|---|---|
-| `CPUFrametime` | PresentMon | время между началами кадров самой игры, мс — сгенерированные кадры в него не попадают |
-| `NativeFPS` | `1000/CPUFrametime` | реальный FPS игры |
-| `TotalFPS` | больший из `FramerateDisplayed` и `FrameratePresented` | FPS с генерацией |
-| `IsFG` | `(NativeFPS >= 10) ? (TotalFPS >= NativeFPS * 1.5) : 0` | 1 — генерация включена |
+| `FrameratePresented`, `FramerateDisplayed` | PresentMon | кадров в секунду от игры и на экране |
+| `TotalFPS` | больший из двух | FPS с генерацией |
+| `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | драйверная генерация (AFMF, Smooth Motion) |
+| `FgLib` | датчик `/overlay-preset/fg/data/0` | 1 — у игры есть библиотека генерации |
+| `GpuActive` | PresentMon `msGpuActive` | время работы видеокарты над кадром |
+| `GpuJump1`, `GpuJump2` | `buf(GpuActive,-1) - buf(GpuActive,-2)` и `…-3)` по модулю | скачок к соседнему кадру и через кадр |
+| `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | доля скачка от среднего времени |
+| `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | скачки именно через кадр, а не беспорядочно |
+| `GameFG` | `FgLib` и `GpuAlt >= 0.25` и `GpuAltRatio >= 2` | генерация внутри игры |
+| `IsFG` | `swavg(FgRaw,3) > 0.9` | 1 — генерация держится 3 с подряд |
+| `IsFGApprox` | генерация не драйверная | показывать `~` |
+| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | реальный FPS игры |
 
-В тексте слоёв: `<IF IsFG>…<ELSE>…<IF>`. Большой оверлей: крупное число — `NativeFPS`, подпись над графиком —
-`Native Framerate  FG 120`. Компактная строка: `FPS 60 FG 120 ↓… ↑…`. Порог `1.5` и минимум `10` FPS можно поменять
-в формуле `IsFG`.
+Замеры на Black Myth: Wukong (FSR 3): `GpuAlt` с генерацией 0.43–0.6, без неё 0.04–0.07; `GpuAltRatio` 4–6
+и около 1. Пороги `0.25` и `2` — в формуле `GameFG`. `buf(Имя,-1)` — последний кадр в буфере PresentMon;
+`buf(x,…)` в формулах источников PresentMon не работает — только по имени источника.
+
+В тексте слоёв: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` не вкладываются (каждый следующий закрывает предыдущий),
+поэтому `~` выводится отдельным блоком `<IF IsFGApprox>~`.
 
 ## Данные, которые добавляет этот пресет
 
-`Exporter.dll` из этого пресета отдаёт в RTSS (провайдер LibreHardwareMonitor) дополнительный блок
-**Memory Timings** — его можно использовать в своих слоях:
+`Exporter.dll` из этого пресета отдаёт в RTSS (провайдер LibreHardwareMonitor) дополнительные блоки
+**Memory Timings** и **Frame Generation** — их можно использовать в своих слоях:
 
 | ID источника | Что |
 |---|---|
@@ -129,6 +139,7 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `/overlay-preset/memory/timing/tcl`, `trcd`, `trp`, `tras`, `trc`, `trfc` | основные тайминги |
 | `/overlay-preset/memory/timing/tcwl`, `trefi`, `cr` | tCWL, tREFI, Command Rate (1/2) |
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
+| `/overlay-preset/fg/data/0` | 1 — у игры на переднем плане есть библиотека генерации кадров (DLSS-G, FSR, XeSS-FG или встроенный FSR 3); результат проверки exe кэшируется в `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Тайминги читаются напрямую из контроллера памяти: Intel Core 6–14 поколения, AMD Ryzen (Zen 2–5).
 На остальных процессорах — только частота.

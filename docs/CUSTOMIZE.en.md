@@ -105,23 +105,33 @@ a copy of the sensor with the formula `(StyleFull) ? (x) : 0`: the sensor value 
 
 ## Frame generation
 
-With frame generation RTSS counts the generated frames too. The game's real FPS comes from **PresentMon** (bundled with
-RTSS, started automatically when the overlay needs its data):
+With frame generation RTSS counts the generated frames too. The sources (the **Sources** menu):
 
 | Source | Formula | Meaning |
 |---|---|---|
-| `CPUFrametime` | PresentMon | time between the starts of the game's own frames, ms — generated frames do not affect it |
-| `NativeFPS` | `1000/CPUFrametime` | the game's real FPS |
-| `TotalFPS` | the larger of `FramerateDisplayed` and `FrameratePresented` | FPS with generation |
-| `IsFG` | `(NativeFPS >= 10) ? (TotalFPS >= NativeFPS * 1.5) : 0` | 1 — frame generation is on |
+| `FrameratePresented`, `FramerateDisplayed` | PresentMon | frames per second from the game and on screen |
+| `TotalFPS` | the larger of the two | FPS with generation |
+| `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | driver-level generation (AFMF, Smooth Motion) |
+| `FgLib` | sensor `/overlay-preset/fg/data/0` | 1 — the game has a frame generation library |
+| `GpuActive` | PresentMon `msGpuActive` | GPU time spent on a frame |
+| `GpuJump1`, `GpuJump2` | absolute `buf(GpuActive,-1) - buf(GpuActive,-2)` and `…-3)` | jump to the next frame and to the one after |
+| `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | jump size relative to the average time |
+| `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | the jumps alternate every frame rather than at random |
+| `GameFG` | `FgLib` and `GpuAlt >= 0.25` and `GpuAltRatio >= 2` | in-game frame generation |
+| `IsFG` | `swavg(FgRaw,3) > 0.9` | 1 — frame generation held for 3 s |
+| `IsFGApprox` | not driver-level | show `~` |
+| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | the game's real FPS |
 
-In layer text: `<IF IsFG>…<ELSE>…<IF>`. Full overlay: the big number is `NativeFPS`, the caption above the graph is
-`Native Framerate  FG 120`. Compact line: `FPS 60 FG 120 ↓… ↑…`. The `1.5` ratio and the `10` FPS minimum can be
-changed in the `IsFG` formula.
+Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
+4–6 and about 1. The `0.25` and `2` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
+PresentMon buffer; `buf(x,…)` does not work inside PresentMon source formulas — only by source name.
+
+In layer text: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` blocks do not nest (each one closes the previous), so `~` is printed by
+a separate `<IF IsFGApprox>~` block.
 
 ## Data added by this preset
 
-The preset's `Exporter.dll` adds a **Memory Timings** block to the RTSS LibreHardwareMonitor provider — you can use it
+The preset's `Exporter.dll` adds **Memory Timings** and **Frame Generation** blocks to the RTSS LibreHardwareMonitor provider — you can use them
 in your own layers:
 
 | Source ID | What |
@@ -130,6 +140,7 @@ in your own layers:
 | `/overlay-preset/memory/timing/tcl`, `trcd`, `trp`, `tras`, `trc`, `trfc` | primary timings |
 | `/overlay-preset/memory/timing/tcwl`, `trefi`, `cr` | tCWL, tREFI, Command Rate (1/2) |
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
+| `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show
 the data rate only.

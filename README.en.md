@@ -87,18 +87,28 @@ Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busie
 
 ### Frame generation
 
-With frame generation RTSS shows the total FPS, not the real one: "120 FPS" with DLSS FG is 60 game frames plus
-60 generated. Like the Steam overlay, both styles tell them apart using **PresentMon** (bundled with RTSS and
-started automatically): it takes the time between the starts of the game's own frames, which generated frames do not
-affect. When the total FPS is 1.5× the real one or more:
-- **full overlay** — the big number under the graph becomes the game's real FPS, and the caption above the graph
-  becomes `Native Framerate  FG 120` (the total FPS with generation);
-- **compact line** — `FPS 60 FG 120 ↓… ↑…`: the game's real FPS first, then the total.
+With frame generation RTSS shows the total FPS, not the real one: "90 FPS" with frame generation is 45 game frames
+plus 45 generated. The overlay tells them apart in three ways:
+
+1. **Driver-level generation** (AMD AFMF, NVIDIA Smooth Motion) — more frames reach the screen than the game presents;
+   **PresentMon** (bundled with RTSS) sees this, so the real FPS is measured exactly.
+2. **In-game generation** (FSR, DLSS, XeSS) — PresentMon does not mark it, so two signs are needed at once: the game
+   has a frame generation library (checked by the preset's `Exporter.dll`: an FG DLL or FSR 3 built into the game
+   itself) **and** the frame rhythm — every second frame is much lighter for the GPU. The real FPS is then the total
+   divided by two; it is an estimate, so it is marked **`FG~`**.
+3. The sign must hold for 3 seconds in a row — short spikes do not switch it on.
+
+On screen:
+- **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
+  `Native Framerate  FG~ 90` (the total FPS with generation);
+- **compact line** — `FPS 45 FG~ 90 ↓… ↑…`.
+
+Tested in Black Myth: Wukong (FSR 3, RTX 3080 Ti): with frame generation `FG~` and the real FPS at half the total,
+without it the normal view. DLSS FG, AFMF and Smooth Motion are not tested yet. Steam detects frame generation
+differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FSR 3.0 built into the game (as in Wukong)
+is invisible to it.
 
 How it works and how to change the thresholds — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#frame-generation).
-
-Tested without frame generation; not yet tested with DLSS FG, FSR FG or AFMF — if the numbers look wrong, please open
-an [issue](../../issues).
 
 ### Supported hardware
 

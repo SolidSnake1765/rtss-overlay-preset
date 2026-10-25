@@ -3,10 +3,16 @@
 # сплошным потоком; части без датчика просто не попадают в строку. Build-Overlay кладёт его в тот же .ovl,
 # что и большой вид, и переключает их клавишей (см. Add-CompactStyle в Build-Overlay.ps1).
 #
-# Генерация кадров (DLSS FG, FSR FG, AFMF, Smooth Motion): нативный FPS берётся из PresentMon (входит в RTSS) —
-# CPUFrametime — время между началами кадров самой игры, сгенерированные кадры в него не попадают.
-# Итоговый FPS — больший из «показанных» и «отправленных на экран» по PresentMon. Если итоговый в 1.5 раза
-# и больше выше нативного, строка FPS становится «FPS 60 FG 120 ↓… ↑…».
+# Генерация кадров — источники здесь, их же использует большой вид. Три признака:
+#   1. драйверная генерация (AMD AFMF, NVIDIA Smooth Motion): на экран выводится в 1.5+ раза больше кадров, чем
+#      отдала игра (PresentMon: FramerateDisplayed против FrameratePresented) — это измерение, реальный FPS точный;
+#   2. у игры есть библиотека генерации (DLSS-G, FSR, XeSS-FG) — датчик /overlay-preset/fg/data/0 из Exporter.dll;
+#   3. ритм кадров: каждый второй кадр гораздо легче для видеокарты. По буферу кадров PresentMon (buf(GpuActive,-1)
+#      — последний кадр): средний скачок времени GPU между соседними кадрами — больше 25 % от среднего времени, а
+#      через кадр значения почти совпадают (скачок между соседними в 2+ раза больше). Wukong, FSR 3: 0.6 и 5.9;
+#      без генерации: 0.04 — разница в 15 раз; второе условие отсекает беспорядочные скачки (статтеры).
+#   Генерацию внутри игры PresentMon не помечает, поэтому для неё нужны 2 и 3 вместе; реальный FPS — итоговый
+#   пополам (оценка, в строке «FG~»). Признак должен держаться несколько секунд подряд.
 
 $script:Steam = @{
     Fps = 'E8836B'; Cpu = 'E5C35C'; Gpu = '7DC75A'; Ram = 'B49DDB'; Fg = '6EC6FF'
@@ -37,14 +43,24 @@ function Get-CompactParts($Report) {
     $down = '<I=6,7,0,0,32,32>'; $up = '<I=6,7,32,0,32,32>'
 
     # --- источники -----------------------------------------------------------------------------------
-    # PresentMon: нативный и итоговый FPS, признак генерации кадров
-    Src 'CPUFrametime' 'PresentMon' 'CPUFrametime' 'ms' '%.1f'
+    # генерация кадров (см. шапку файла); порог 10 FPS — на рабочем столе и в меню кадры единичные
     Src 'FrameratePresented' 'PresentMon' 'FrameratePresented' 'FPS'
     Src 'FramerateDisplayed' 'PresentMon' 'FramerateDisplayed' 'FPS'
-    Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '1000/CPUFrametime'
     Src 'TotalFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(FramerateDisplayed > FrameratePresented) ? FramerateDisplayed : FrameratePresented'
-    # порог 10 FPS: на рабочем столе и в меню PresentMon ловит единичные кадры, и 1 против 3 — не генерация
-    Src 'IsFG' 'HAL' 'Stub' '' '' '(NativeFPS >= 10) ? (TotalFPS >= NativeFPS * 1.5) : 0'
+    # скачки считаются формулой источника PresentMon — на каждом кадре; buf(x,-1) там не работает, только по имени
+    $abs = { param($e) "(($e) > 0) ? ($e) : (0 - ($e))" }
+    Src 'GpuActive' 'PresentMon' 'msGpuActive' 'ms' '%.1f'
+    Src 'GpuJump1' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-2)')
+    Src 'GpuJump2' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-3)')
+    Src 'GpuAlt' 'HAL' 'Stub' '' '%.2f' 'swavg(GpuJump1,64) / swavg(GpuActive,64)'
+    Src 'GpuAltRatio' 'HAL' 'Stub' '' '%.1f' 'swavg(GpuJump1,64) / swavg(GpuJump2,64)'
+    Src 'FgLib' 'LHM' '/overlay-preset/fg/data/0'
+    Src 'DrvFG' 'HAL' 'Stub' '' '' '(FrameratePresented >= 10) ? (FramerateDisplayed >= FrameratePresented * 1.5) : 0'
+    Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * (GpuAltRatio >= 2)) : 0'
+    Src 'FgRaw' 'HAL' 'Stub' '' '' '(DrvFG + GameFG) > 0'
+    Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,3) > 0.9'
+    Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
+    Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
 
     Src 'CPU usage' 'HAL' 'CPU usage' '%'
     Src 'CPU usage max' 'HAL' 'CPU usage max' '%'
@@ -83,7 +99,8 @@ function Get-CompactParts($Report) {
     $u = { param($t) "<S=48><C=$($P.Unit)>$t<S=80><C=$($P.Value)>" }
     $parts = New-Object System.Collections.Generic.List[string]
     # FPS: «FPS 225 ↓28 ↑419», при генерации кадров «FPS 60 FG 120 ↓95 ↑130»
-    $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
+    # <IF> не вкладываются: каждый следующий <IF> закрывает предыдущий, поэтому «~» — отдельным блоком
+    $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox>~<IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
     $parts.Add("<C=$($P.Graph)><G=Framerate,40,0,1,0,0,90><C=$($P.Value)>")

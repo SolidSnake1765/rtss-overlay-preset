@@ -4,7 +4,7 @@
 # В файле оба вида — большой и компактная строка; -Style — какой показан сразу, -Key — код клавиши переключения
 # (по умолчанию Scroll Lock). Рядом с .ovl кладётся rtss-overlay-preset-icons.png (стрелки ↓↑ компактной строки).
 param([ValidateSet('Unispace', 'Bahnschrift')][string]$Font = 'Unispace', [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
-      [int]$Key = 0x91, [string]$Path = '')
+      [int]$Key = 0x91, [string]$Path = '', [switch]$FgDebug)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
@@ -32,7 +32,7 @@ Copy-Item (Join-Path $Root 'payload\lhm\*'), (Join-Path $Root 'payload\exporter\
 $probe = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'Probe-Exporter.ps1') -Dir $probeDir | ConvertFrom-Json
 
 New-Item -ItemType Directory -Force (Split-Path $Path) | Out-Null
-$log = Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $data @{ Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $Key; MainStyle = $Style } $Path
+$log = Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $data @{ Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $Key; MainStyle = $Style; FgDebug = [bool]$FgDebug } $Path
 Copy-Item (Join-Path $Root 'overlay\rtss-overlay-preset-icons.png') (Split-Path $Path) -Force
 $log | ForEach-Object { Write-Host "  - $_" }
 Write-Host "OK: $Path" -ForegroundColor Green
