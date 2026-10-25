@@ -8,7 +8,9 @@
 > **Вдохновлено [i2HARD](https://www.youtube.com/@i2hard)** — именно так оверлей настраивают в их тестах железа. Это не официальный
 > проект i2HARD, а пресет в их стиле, сделанный с уважением к их работе.
 
-<img src="docs/images/overlay.png" width="560" alt="Оверлей">
+<img src="docs/images/in-game.jpg" height="400" alt="Оверлей в игре"> <img src="docs/images/overlay.png" height="400" alt="Оверлей в редакторе RTSS">
+
+*Слева — в игре (Uncharted, Vulkan, 2560×1440, шрифт Bahnschrift), справа — в редакторе оверлея RTSS.*
 
 ## Главное
 
