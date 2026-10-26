@@ -84,6 +84,8 @@ instead of Afterburner.
 
 Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busiest thread` · per-thread load · CPU temperature ·
 `average/↑max clock` · `GPU load, temperature, VRAM used/total` · `RAM used/total`.
+Its FPS graph has one point per second, about 80 seconds of history (like Steam); thread bars turn yellow from 70 %
+and red from 90 % load.
 
 ### Frame generation
 
@@ -103,13 +105,14 @@ On screen:
   `Native Framerate  FG~ 90` (the total FPS with generation);
 - **compact line** — `FPS 45 FG~ 90 ↓… ↑…`.
 
-Under frame generation the FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
+Under frame generation the full style's FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
 millisecond: RTSS measures the time between presented frames, and a generated frame is presented right after the real
 one. On screen the frames are evenly paced. Redrawing the graphs from PresentMon data was tried — the data arrives in
 batches with a delay and the graphs stutter, so it stays this way for now.
 
-Tested in Black Myth: Wukong (FSR 3, RTX 3080 Ti): with frame generation `FG~` and the real FPS at half the total,
-without it the normal view. DLSS FG, AFMF and Smooth Motion are not tested yet. Steam detects frame generation
+Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with the RTX 30 Frame Generation mod
+(DLSS FG) — with frame generation `FG~` and the real FPS at half the total, without it the normal view. AFMF and Smooth
+Motion are not tested yet. Steam detects frame generation
 differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FSR 3.0 built into the game (as in Wukong)
 is invisible to it.
 

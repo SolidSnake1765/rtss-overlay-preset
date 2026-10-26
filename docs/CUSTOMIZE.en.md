@@ -61,6 +61,9 @@ The compact line is the file's last layer (`compact`): the whole line is RTSS hy
 arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
 `<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. The FPS graph is `<G=FpsSec,…>`: one point per second, about 80 s of history. Thread bars turn yellow from 70 % and red from 90 % load (`Warm<n>`, `Hot<n>` sources). Block colors: FPS `E8836B`, CPU `E5C35C`,
 GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
+Background: the layer has a fixed height of 11 with the text centred, and the line's last tag `<I=8,7,0,0,2,2>` is an
+invisible spacer (a transparent corner of the arrow image): without it RTSS makes the background shorter than the
+text and the last "GB" sticks out.
 
 ## How style switching works
 
@@ -141,6 +144,7 @@ in your own layers:
 | `/overlay-preset/memory/timing/tcwl`, `trefi`, `cr` | tCWL, tREFI, Command Rate (1/2) |
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
 | `/overlay-preset/fps/data/0` | the foreground game's FPS once per second — from RTSS shared memory (the same calculation as RTSS itself); drives the compact line's smooth FPS graph |
+| `/overlay-preset/fps/data/1` | the slowest frame of the last second, ms — from RTSS's frame time buffer (not used by the overlay right now) |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show
