@@ -141,22 +141,34 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `TotalFPS` | the larger of the two | FPS with generation |
 | `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | driver-level generation (AFMF, Smooth Motion) |
 | `FgLib` | sensor `/overlay-preset/fg/data/0` | 1 — the game has a frame generation library |
-| `GpuActive` | PresentMon `msGpuActive` | GPU time spent on a frame |
-| `GpuJump1` … `GpuJump4` | absolute `buf(GpuActive,-1) - buf(GpuActive,-2)` … `-5)` | jump to the next frame, 1, 2 and 3 frames further |
-| `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | jump size relative to the average time |
-| `GpuAltRatio`, `GpuAltRatio3`, `GpuAltRatio4` | `swavg(GpuJump1,64) / swavg(GpuJump2…4,64)` | the pattern repeats every 1, 2, 3 frames (r2, r3, r4) |
-| `FgMul2`, `FgMul3`, `FgMul4` | ×2: `r2 >= 1.5`; ×3: `r3 >= 1.5`, `r2` and `r4 < 1.25`; ×4: `r4 >= 1.5` and `>= r2 × 1.5`, `r2` and `r3 < 1.25` | frame generation multiplier |
-| `GameFG` | `FgLib` and `GpuAlt >= 0.25` and one of `FgMul` | in-game frame generation |
+| `FgRhythm` | sensor `/overlay-preset/fgr/data/0` | rhythm: average GPU-time jump to the next frame / average time |
+| `FgMul` | sensor `/overlay-preset/fgr/data/1` | multiplier: how many frames until the pattern repeats (2…8), 0 — it does not |
+| `FgN` | sensor `/overlay-preset/fgr/data/2` | the most frequent multiplier of the last 5 s — for the real FPS |
+| `GameFG` | `FgLib` and `FgRhythm >= 0.25` and `FgMul >= 2` | in-game frame generation |
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — frame generation present for most of the last 5 s (10 updates of 500 ms) |
 | `IsFGApprox` | not driver-level | show `≈` |
-| `FgN` | 4 / 3 if `FgMul4` / `FgMul3` held for most of the last 5 s, otherwise 2 | multiplier for the real FPS |
-| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` | the game's real FPS |
+| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` (`FgN` below 2 — divide by 2) | the game's real FPS |
 
-Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
-4–6 and about 1; in Witcher 3 with the RTX 30 FG mod `GpuAltRatio` hovers around 2, hence the 1.5 threshold. Witcher 3 +
-OptiScaler (FSR 3.1 FG, ×2, 26.10): in game `GpuAlt` is 1.6–2.1 with frame generation and 0.0–0.1 without it; in the menu the
-values jump around and the sign does not hold — that is expected. The `0.25` and `1.5` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
-PresentMon buffer; `buf(x,…)` does not work inside PresentMon source formulas — only by source name.
+The rhythm and the multiplier are computed by `Exporter.dll` (`src\Exporter\FrameRhythm.cs`) from the game's last ~240
+frames in PresentMon's shared memory (`PMDPSharedMemory`, format — `SDK\Include\PMDPSharedMemory.h` in the RTSS folder):
+each frame's GPU busy time (`GPUBusy`), D(k) — the average absolute difference with the frame k back; rhythm =
+D(1) / average, multiplier — the smallest k in 2…8 where D(k) is at most half of D(1). Overlay formulas cannot do this:
+PresentMon delivers frames in batches and `buf()` in a formula sees only the end of the batch — the previous version was
+wrong two times out of three at ×3.
+
+Measurements (Witcher 3 + OptiScaler, FSR 3.1 FG, RTX 3080 Ti, 26.10.2026), 16–40 samples per mode:
+
+| Mode | Rhythm | Multiplier | Real FPS / total |
+|---|---|---|---|
+| no frame generation | 0.06–0.08 | 0 | — |
+| ×2 | 1.6–2.1 | 2 | ~67 / ~134 |
+| ×3 | 1.61–1.64 | 3 | ~78 / ~235 |
+| ×4 | 1.49–1.53 | 4 | ~73 / ~293 |
+| ×5 | 1.39–1.46 | 5 | ~66 / ~330 |
+| ×6 | 1.33–1.37 | 6 (OptiScaler sometimes inserts 4 frames instead of 5) | ~61 / ~370 |
+
+The `0.25` rhythm threshold is in the `GameFG` formula. In the game menu the rhythm drowns in noise and the sign does not
+hold — that is expected.
 
 In layer text: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` blocks do not nest (each one closes the previous), so `≈` is printed by
 a separate `<IF IsFGApprox><I=6,7,64,0,32,32>` block — an icon from
@@ -181,6 +193,7 @@ in your own layers:
 | `/overlay-preset/fps/data/1` | the slowest frame of the last half second, ms — from RTSS's frame time buffer (not used by the overlay right now) |
 | `/overlay-preset/osd/data/0`, `data/1` | the overlay position on screen — `PositionX`, `PositionY` from the RTSS profile (the game's profile if it sets them, otherwise Global); negative means from the right / bottom edge |
 | `/overlay-preset/fg/data/1` | how the library was found (for the `-FgDebug` line): 1 loaded module, 2 DLL in the game folder, 3 FSR 3 inside the exe, 0 not found; +10 — module list closed (anti-cheat) |
+| `/overlay-preset/fgr/data/0`, `1`, `2` | frame generation rhythm, multiplier (2…8, 0 — none) and the multiplier over 5 s — from PresentMon frames in shared memory |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show

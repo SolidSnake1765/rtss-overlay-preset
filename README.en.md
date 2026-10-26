@@ -105,8 +105,9 @@ plus 45 generated. The overlay tells them apart in three ways:
    has a frame generation library (checked by the preset's `Exporter.dll`: an FG DLL or FSR 3 built into the game
    itself; if an anti-cheat hides the game's module list, like BattlEye in GTA V, an FG DLL in the game folder)
    **and** the frame rhythm — a real frame is heavy for the GPU, generated ones are light, and the pattern repeats:
-   every other frame at ×2, every 3rd and 4th frame with DLSS 4 multi frame generation (×3, ×4). The real FPS is then
-   the total divided by the detected multiplier; it is an estimate, so it is marked **`FG≈`**.
+   every other frame at ×2, every 3rd, 4th or more with multi frame generation (DLSS 4 MFG, OptiScaler). `Exporter.dll`
+   computes the rhythm from the last ~240 frames of PresentMon data and finds the multiplier from ×2 to ×8. The real FPS
+   is the total divided by the multiplier; it is an estimate, so it is marked **`FG≈`**.
 3. The sign must hold for most of the last 5 seconds — short spikes do not switch it on.
 
 On screen:
@@ -119,8 +120,9 @@ millisecond: RTSS measures the time between presented frames, and a generated fr
 one. On screen the frames are evenly paced. Redrawing the graphs from PresentMon data was tried — the data arrives in
 batches with a delay and the graphs stutter, so it stays this way for now.
 
-Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with the RTX 30 Frame Generation mod
-(DLSS FG) — with frame generation `FG≈` and the real FPS at half the total, without it the normal view. AFMF and Smooth
+Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with OptiScaler (DLSS frame generation
+→ FSR 3.1) at ×2, ×3, ×4, ×5 and ×6 — the multiplier is detected correctly and the real FPS is the total divided by it;
+no false positives without frame generation. AFMF and Smooth
 Motion are not tested yet. Steam detects frame generation
 differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FSR 3.0 built into the game (as in Wukong)
 is invisible to it.
@@ -161,7 +163,7 @@ Run `installer\Detect.ps1 -Export` (PowerShell as administrator) and attach the 
 `installer\hardware-report.json` to an [issue](../../issues).
 
 **Frame generation is on, but the overlay does not see it.** Reinstall the preset with `install.bat -FgDebug` — a line
-with the raw signs appears to the right of the overlay (`lib` — library found, `alt`, `r2`/`r3`/`r4` — frame rhythm,
+with the raw signs appears to the right of the overlay (`lib` — library found, `rhythm` — frame rhythm, `mul` and
 `x` — multiplier). Take a screenshot in the game with frame generation and attach it to an [issue](../../issues)
 with the game and GPU name. Running `install.bat` again brings back the normal view.
 

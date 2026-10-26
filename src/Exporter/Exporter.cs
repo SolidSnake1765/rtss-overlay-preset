@@ -5,7 +5,8 @@
 // through shared memory to the OverlayEditor plugin. This is an independent implementation
 // of that contract on top of LibreHardwareMonitorLib, plus an extra "/overlay-preset/memory" block
 // with the memory data rate and the live DRAM timings, and "/overlay-preset/fg" — whether the foreground
-// game has a frame generation library (FrameGenProbe.cs), and "/overlay-preset/fps" — the foreground game's
+// game has a frame generation library (FrameGenProbe.cs), "/overlay-preset/fgr" — the frame generation rhythm
+// and multiplier from PresentMon frame data (FrameRhythm.cs), and "/overlay-preset/fps" — the foreground game's
 // framerate per sensor update from RTSS shared memory (RtssFramerate.cs), and "/overlay-preset/osd" — where RTSS
 // places the overlay (OsdPosition.cs).
 //
@@ -72,6 +73,14 @@ namespace Exporter
 			try
 			{
 				xml.Append(FrameGenProbe.ToXml());
+			}
+			catch (Exception)
+			{
+			}
+
+			try
+			{
+				xml.Append(FrameRhythm.ToXml());
 			}
 			catch (Exception)
 			{
