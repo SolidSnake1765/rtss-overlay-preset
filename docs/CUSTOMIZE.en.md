@@ -128,15 +128,16 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | the jumps alternate every frame rather than at random |
 | `GameFG` | `FgLib` and `GpuAlt >= 0.25` and `GpuAltRatio >= 1.5` | in-game frame generation |
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — frame generation present for most of the last 5 s (10 updates of 500 ms) |
-| `IsFGApprox` | not driver-level | show `~` |
+| `IsFGApprox` | not driver-level | show `≈` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | the game's real FPS |
 
 Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
 4–6 and about 1; in Witcher 3 with the RTX 30 FG mod `GpuAltRatio` hovers around 2, hence the 1.5 threshold. The `0.25` and `1.5` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
 PresentMon buffer; `buf(x,…)` does not work inside PresentMon source formulas — only by source name.
 
-In layer text: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` blocks do not nest (each one closes the previous), so `~` is printed by
-a separate `<IF IsFGApprox>~` block.
+In layer text: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` blocks do not nest (each one closes the previous), so `≈` is printed by
+a separate `<IF IsFGApprox><I=6,7,64,0,32,32>` block — an icon from
+`rtss-overlay-preset-icons.png`: RTSS draws a small `~` as a flat dash that looks like a minus.
 
 ## Data added by this preset
 

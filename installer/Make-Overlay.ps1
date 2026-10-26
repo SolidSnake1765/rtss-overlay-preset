@@ -2,7 +2,7 @@
 # Запуск от администратора (иначе не видны датчики платы и процессора):
 #   powershell -ExecutionPolicy Bypass -File installer\Make-Overlay.ps1 [-Font Bahnschrift|Unispace] [-Style Full|Compact] [-Key 0x91] [-Path путь.ovl]
 # В файле оба вида — большой и компактная строка; -Style — какой показан сразу, -Key — код клавиши переключения
-# (по умолчанию Scroll Lock). Рядом с .ovl кладётся rtss-overlay-preset-icons.png (стрелки ↓↑ компактной строки).
+# (по умолчанию Scroll Lock). Рядом с .ovl кладётся rtss-overlay-preset-icons.png (значки ↓↑≈).
 param([ValidateSet('Bahnschrift', 'Unispace')][string]$Font = 'Bahnschrift', [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
       [int]$Key = 0x91, [string]$Path = '', [switch]$FgDebug)
 

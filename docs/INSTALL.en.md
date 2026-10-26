@@ -27,7 +27,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 | PawnIO driver | installed silently if missing (needed for motherboard, CPU and memory timing sensors) |
 | Files | into `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, PawnIO modules |
 | Hardware | CPU, GPU, motherboard, memory; every sensor is matched by name, no hardcoded indexes |
-| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` — both styles in one file, built for your PC, + `rtss-overlay-preset-icons.png` (the compact line's ↓↑ arrows) |
+| Overlay | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` — both styles in one file, built for your PC, + `rtss-overlay-preset-icons.png` (the ↓↑≈ icons) |
 | RTSS settings | see below |
 | MSI Afterburner | if its own OSD is enabled, only that is turned off |
 
@@ -110,7 +110,7 @@ The same steps by hand.
    ```
    This creates `Documents\rtss-overlay-preset.ovl`. The script changes nothing in the system, it only reads sensors.
    Copy the file into `RTSS\Plugins\Client\Overlays\`.
-   It also creates `rtss-overlay-preset-icons.png` (the compact line's arrows) — copy **both** files.
+   It also creates `rtss-overlay-preset-icons.png` (the ↓↑≈ icons) — copy **both** files.
    The file holds both styles; `-Style Compact` shows the compact line first, `-Key 0x13` switches with Pause instead
    of Scroll Lock (a Windows virtual key code).
 5. **Enable the overlay:** start RTSS → **Setup** → **Plugins** tab → tick **OverlayEditor.dll** and

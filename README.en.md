@@ -13,7 +13,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 |:---:|:---:|
 | <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Full style close-up"> |
 
-**Compact line** in the style of Steam Performance Monitor — in game (real FPS 51, `FG~103` with frame generation) and close-up:
+**Compact line** in the style of Steam Performance Monitor — in game (real FPS 51, `FG≈103` with frame generation) and close-up:
 
 <img src="docs/images/compact-in-game.jpg" alt="Compact line in game">
 
@@ -101,13 +101,13 @@ plus 45 generated. The overlay tells them apart in three ways:
 2. **In-game generation** (FSR, DLSS, XeSS) — PresentMon does not mark it, so two signs are needed at once: the game
    has a frame generation library (checked by the preset's `Exporter.dll`: an FG DLL or FSR 3 built into the game
    itself) **and** the frame rhythm — every second frame is much lighter for the GPU. The real FPS is then the total
-   divided by two; it is an estimate, so it is marked **`FG~`**.
+   divided by two; it is an estimate, so it is marked **`FG≈`**.
 3. The sign must hold for most of the last 5 seconds — short spikes do not switch it on.
 
 On screen:
 - **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
-  `Native Framerate  FG~ 90` (the total FPS with generation);
-- **compact line** — `FPS 45 FG~ 90 ↓… ↑…`.
+  `Native Framerate  FG≈ 90` (the total FPS with generation);
+- **compact line** — `FPS 45 FG≈ 90 ↓… ↑…`.
 
 Under frame generation the full style's FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
 millisecond: RTSS measures the time between presented frames, and a generated frame is presented right after the real
@@ -115,7 +115,7 @@ one. On screen the frames are evenly paced. Redrawing the graphs from PresentMon
 batches with a delay and the graphs stutter, so it stays this way for now.
 
 Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with the RTX 30 Frame Generation mod
-(DLSS FG) — with frame generation `FG~` and the real FPS at half the total, without it the normal view. AFMF and Smooth
+(DLSS FG) — with frame generation `FG≈` and the real FPS at half the total, without it the normal view. AFMF and Smooth
 Motion are not tested yet. Steam detects frame generation
 differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FSR 3.0 built into the game (as in Wukong)
 is invisible to it.
