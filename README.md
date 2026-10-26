@@ -9,11 +9,13 @@
 > **Вдохновлено [i2HARD](https://www.youtube.com/@i2hard)** — именно так оверлей настраивают в их тестах железа. Это не официальный
 > проект i2HARD, а пресет в их стиле, сделанный с уважением к их работе.
 
-| В игре (Uncharted, Vulkan, 2560×1440, шрифт Bahnschrift) | Крупным планом |
+| В игре (Black Myth: Wukong, генерация кадров FSR 3, 2560×1440) | Крупным планом |
 |:---:|:---:|
 | <img src="docs/images/in-game.jpg" width="400" alt="Оверлей в игре"> | <img src="docs/images/overlay.png" width="400" alt="Большой вид крупным планом"> |
 
-**Компактная строка** в стиле Steam Performance Monitor:
+**Компактная строка** в стиле Steam Performance Monitor — в игре (реальный FPS 51, с генерацией `FG~103`) и крупным планом:
+
+<img src="docs/images/compact-in-game.jpg" alt="Компактная строка в игре">
 
 <img src="docs/images/compact.png" alt="Компактный оверлей в стиле Steam">
 
