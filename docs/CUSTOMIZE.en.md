@@ -59,7 +59,7 @@ thresholds.
 The compact line is the file's last layer (`compact`): the whole line is RTSS hypertext in its **Text** field:
 `<C=RRGGBB>` — color, `<S=48>…<S=80>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
 arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
-`<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. The FPS graph is `<G=FpsSec,…>`: one point per second, about 80 s of history. Thread bars turn yellow from 70 % and red from 90 % load (`Warm<n>`, `Hot<n>` sources). Block colors: FPS `E8836B`, CPU `E5C35C`,
+`<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. The FPS graph is `<G=FpsSec,…>`: one point per overlay refresh (0.5 s), about 40 s of history; about 3 minutes in the full style. Thread bars turn yellow from 70 % and red from 90 % load (`Warm<n>`, `Hot<n>` sources). Block colors: FPS `E8836B`, CPU `E5C35C`,
 GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
 
 ## How style switching works
@@ -118,7 +118,7 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | jump size relative to the average time |
 | `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | the jumps alternate every frame rather than at random |
 | `GameFG` | `FgLib` and `GpuAlt >= 0.25` and `GpuAltRatio >= 1.5` | in-game frame generation |
-| `IsFG` | `swavg(FgRaw,5) >= 0.6` | 1 — frame generation present for most of the last 5 s |
+| `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — frame generation present for most of the last 5 s (10 refreshes of 0.5 s) |
 | `IsFGApprox` | not driver-level | show `~` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | the game's real FPS |
 

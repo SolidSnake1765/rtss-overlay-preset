@@ -7,7 +7,7 @@ ZoomRatio=2
 [Settings]
 Name=
 EnvVars=
-RefreshPeriod=1000
+RefreshPeriod=500
 LockUserSettings=0
 EmbeddedImage=sample.png
 PingAddr=127.0.0.1
