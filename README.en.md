@@ -27,7 +27,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Live DRAM timings** straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5, DDR4 and DDR5).
 - **Nothing overflows its box** — even 1000+ FPS, 28000 MHz memory clock or 100 °C.
 - **Warning colors:** overheating and low FPS turn yellow and red.
-- **Two fonts:** Unispace (classic) and Bahnschrift.
+- **Two fonts:** Bahnschrift (default) and Unispace (classic).
 - **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
 - **Native FPS under frame generation** (both styles): like Steam, it shows the game's real frame rate and the total
   with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
@@ -60,7 +60,7 @@ Assigned during the install — just press the combination you want.
 | Overlay: top ↕ bottom | Ctrl+Alt+Num 8 | moves the overlay to the top or bottom edge; together with the previous one — to any corner |
 | Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
-After RTSS restarts, the main style is enabled — the full one (to make the compact line main: `install.bat -Style Compact`).
+The installer asks which style is the main one — shown after RTSS starts (the full one by default).
 How switching works and how to change the key by hand — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#how-style-switching-works).
 
 ## MSI Afterburner

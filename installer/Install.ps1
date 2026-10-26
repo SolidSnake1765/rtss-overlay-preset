@@ -1,11 +1,11 @@
 ﻿# RTSS Overlay Preset — установщик.
 # Запуск: install.bat (сам попросит права администратора).
-# Параметры: -Lang ru|en, -Font Unispace|Bahnschrift, -Style Full|Compact (какой оверлей основной, по умолчанию Full),
+# Параметры: -Lang ru|en, -Font Bahnschrift|Unispace, -Style Full|Compact (какой оверлей основной; без них — вопросы),
 #            -Defaults (горячие клавиши без вопросов), -NoRestart
 param(
     [ValidateSet('', 'ru', 'en')][string]$Lang = '',
-    [ValidateSet('', 'Unispace', 'Bahnschrift')][string]$Font = '',
-    [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
+    [ValidateSet('', 'Bahnschrift', 'Unispace')][string]$Font = '',
+    [ValidateSet('', 'Full', 'Compact')][string]$Style = '',
     [switch]$Defaults,
     [switch]$NoRestart
 )
@@ -51,13 +51,21 @@ try {
     Say ''
     Say "RTSS $($rtss.Version): $($rtss.Dir)"
 
-    # 2. Вопросы: шрифт и горячие клавиши (всё интерактивное — в начале) ----------------------------
+    # 2. Вопросы: шрифт, основной вид и горячие клавиши (всё интерактивное — в начале) ----------------
     if (-not $Font) {
         Say ''
         Say (T 'Шрифт оверлея:' 'Overlay font:') -Color Cyan
-        Say '  1 - Unispace'
-        Say '  2 - Bahnschrift'
-        $Font = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Bahnschrift' } else { 'Unispace' }
+        Say '  1 - Bahnschrift'
+        Say '  2 - Unispace'
+        $Font = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Unispace' } else { 'Bahnschrift' }
+    }
+    if (-not $Style) {
+        # ставятся оба вида, вопрос только о том, какой показан после запуска RTSS
+        Say ''
+        Say (T 'Основной вид оверлея (второй всегда под рукой — клавиша переключения вида):' 'Main overlay style (the other one is always a key press away):') -Color Cyan
+        Say (T '  1 - большой (все датчики, графики FPS и frametime)' '  1 - full (all sensors, FPS and frametime graphs)')
+        Say (T '  2 - компактная строка в стиле Steam' '  2 - compact Steam-style line')
+        $Style = if ((Read-Host (T '  Выберите 1 или 2 [1]' '  Choose 1 or 2 [1]')) -eq '2') { 'Compact' } else { 'Full' }
     }
 
     # бэкап до любых изменений
@@ -141,6 +149,7 @@ try {
     Say ''
     Say (T "Готово. Оверлей включён (шрифт $Font). Журнал: $LogFile" "Done. The overlay is enabled (font $Font). Log: $LogFile") -Color Green
     Say ((T 'Два вида — большой и компактная строка в стиле Steam; переключение в игре: ' 'Two styles — full and a compact Steam-style line; switch in game with ') + (Format-Hotkey $script:StyleKey))
+    Say ((T 'Основной вид (после запуска RTSS): ' 'Main style (after RTSS starts): ') + $(if ($Style -eq 'Compact') { T 'компактная строка' 'compact line' } else { T 'большой' 'full' }))
     Say (T 'Удалить и вернуть как было: uninstall.bat' 'To remove and restore: uninstall.bat')
 }
 catch {

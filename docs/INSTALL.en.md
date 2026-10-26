@@ -12,7 +12,8 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 2. Run **`install.bat`** and confirm the administrator prompt.
 3. Answer the questions:
    - installer **language** — Russian or English;
-   - **font** — `1` Unispace or `2` Bahnschrift;
+   - **font** — `1` Bahnschrift (default) or `2` Unispace;
+   - **main style** — `1` full (default) or `2` the compact line: which one is shown after RTSS starts;
    - **hotkeys** — a window opens: click a field and press the combination, "Clear" leaves it unassigned.
    Both overlay styles are installed — full and the compact line; one key cycles between them.
 4. Wait for "Done". RTSS restarts with the overlay.
@@ -56,8 +57,8 @@ Everything else (frame limiter, Reflex, stealth mode, application detection) is 
 
 Both styles live in one file, and which one is shown is decided by the `key()` formula — a key press counter kept by
 the HotkeyHandler plugin (so it must be enabled). The counter tracks a single key and does not see Ctrl/Alt, so a
-combination cannot be used here. After RTSS restarts, the main style is enabled — the full one; to make the compact
-line main: `install.bat -Style Compact`.
+combination cannot be used here. After RTSS restarts, the main style is enabled — the one picked during installation (without the question:
+`install.bat -Style Full` or `-Style Compact`).
 
 **Screen corner.** The corner keys are HotkeyHandler "profile modifiers" (Profile modifier 1–4): on a press RTSS
 flips the sign of the overlay position in the global profile (`PositionX` / `PositionY`, XOR with `-2`: `1` ↔ `-1`).
@@ -105,7 +106,7 @@ The same steps by hand.
    - `payload\pawnio\IntelMCHBAR.bin` and `payload\pawnio\AMDFamily17.bin`
 4. **Build the overlay for your PC** — PowerShell **as administrator**, in the archive folder:
    ```powershell
-   powershell -ExecutionPolicy Bypass -File installer\Make-Overlay.ps1 -Font Unispace
+   powershell -ExecutionPolicy Bypass -File installer\Make-Overlay.ps1 -Font Bahnschrift
    ```
    This creates `Documents\rtss-overlay-preset.ovl`. The script changes nothing in the system, it only reads sensors.
    Copy the file into `RTSS\Plugins\Client\Overlays\`.

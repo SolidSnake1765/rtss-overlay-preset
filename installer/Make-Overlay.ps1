@@ -1,9 +1,9 @@
 ﻿# RTSS Overlay Preset — только собрать rtss-overlay-preset.ovl под этот ПК, ничего не меняя в системе (для ручной установки).
 # Запуск от администратора (иначе не видны датчики платы и процессора):
-#   powershell -ExecutionPolicy Bypass -File installer\Make-Overlay.ps1 [-Font Unispace|Bahnschrift] [-Style Full|Compact] [-Key 0x91] [-Path путь.ovl]
+#   powershell -ExecutionPolicy Bypass -File installer\Make-Overlay.ps1 [-Font Bahnschrift|Unispace] [-Style Full|Compact] [-Key 0x91] [-Path путь.ovl]
 # В файле оба вида — большой и компактная строка; -Style — какой показан сразу, -Key — код клавиши переключения
 # (по умолчанию Scroll Lock). Рядом с .ovl кладётся rtss-overlay-preset-icons.png (стрелки ↓↑ компактной строки).
-param([ValidateSet('Unispace', 'Bahnschrift')][string]$Font = 'Unispace', [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
+param([ValidateSet('Bahnschrift', 'Unispace')][string]$Font = 'Bahnschrift', [ValidateSet('Full', 'Compact')][string]$Style = 'Full',
       [int]$Key = 0x91, [string]$Path = '', [switch]$FgDebug)
 
 $ErrorActionPreference = 'Stop'

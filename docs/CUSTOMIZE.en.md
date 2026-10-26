@@ -107,7 +107,7 @@ a copy of the sensor with the formula `(StyleFull) ? (x) : 0`: the sensor value 
   The rest are in Microsoft's
   [Virtual-Key Codes](https://learn.microsoft.com/windows/win32/inputdev/virtual-key-codes) table.
 - **Make the compact style the main one:** swap `== 0` and `!= 0` in these two formulas
-  (or install with `install.bat -Style Compact`).
+  (or pick it as the main style when installing).
 - **Your own layer** for one style only: set its visibility source to `StyleFull` or `StyleCompact`.
 
 > Running `install.bat` again rebuilds the file and overwrites manual edits — keep your version under another name.
