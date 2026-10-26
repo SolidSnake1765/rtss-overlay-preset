@@ -33,6 +33,9 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
 - **Native FPS under frame generation** (both styles): like Steam, it shows the game's real frame rate and the total
   with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
+- **Present Mode** — how the game's frames reach the screen: green `iFlip` / `iFlip MPO` — directly, bypassing the
+  Windows desktop (lowest latency, G-Sync / FreeSync work properly), yellow `Composed` — through the desktop,
+  red `Composed Copy` — by copying, grey `Legacy` — old modes. Shown in the full style after the resolution.
 - Installer and documentation in Russian and English.
 
 ## Install
@@ -84,7 +87,7 @@ instead of Afterburner.
 | RAM | data rate, timings tCL-tRCD-tRP-tRAS-tRC-tRFC, used, module temperature, voltage |
 | Threads | load of every thread (P- and E-cores as separate blocks) |
 | GPU | clock, fan speed, temperature, memory clock / used / temperature, voltage, power, Hot Spot, load |
-| FPS | average, 1% and 0.1% low, current, FPS and frametime graphs, API, resolution |
+| FPS | average, 1% and 0.1% low, current, FPS and frametime graphs, API, resolution, Present Mode |
 
 Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busiest thread` · per-thread load · CPU temperature ·
 `average/↑max clock` · `GPU load, temperature, VRAM used/total` · `RAM used/total`.

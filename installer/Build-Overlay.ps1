@@ -216,6 +216,11 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
     $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
     Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG> %TotalFPS%<ELSE>Current Framerate<IF>'
+    # Present Mode (источники Pm* — Build-Compact.ps1) — после разрешения: зелёный — кадры идут мимо рабочего стола
+    # (iFlip, iFlip MPO), жёлтый — через рабочий стол (Composed), красный — копированием (Composed Copy), серый — Legacy.
+    # Блоки <IF> не вкладываются: каждый закрывает предыдущий, поэтому варианты идут цепочкой
+    Set-Key (Layer 'fps.res') 'Text' ('<RES>  <IF PmIFlip><C=7DC75A>iFlip<IF PmMpo><C=7DC75A>iFlip MPO<IF PmComposed><C=FFD040>Composed' +
+        '<IF PmCopy><C=FF5A5A>Composed Copy<IF PmLegacy><C=D2D2D2>Legacy<IF>')
     # GPU Usage: залитая область цвета вендора видеокарты, шкала фиксированная 0..100 % — высота сразу читается
     # как загрузка (автомасштаб тут вреден: 20 % растягивались бы на всю высоту)
     Set-Key (Layer 'gpu.usage.graph') 'Text' '<G=GPU1 usage,0,0,-1,0,100,1>'

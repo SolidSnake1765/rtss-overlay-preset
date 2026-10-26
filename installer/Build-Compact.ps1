@@ -63,6 +63,16 @@ function Get-CompactParts($Report) {
     Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,10) >= 0.6'    # 10 обновлений оверлея по 500 мс = 5 с
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
+    # Present Mode — как кадры игры попадают на экран (PresentMon, PM_PRESENT_MODE в SDK\Include\PresentMon\PresentMonAPI.h):
+    # 3 — Hardware: Independent Flip (мимо рабочего стола Windows, минимальная задержка), 8 — то же через аппаратный
+    # слой MPO, 4 — Composed: Flip (через рабочий стол, DWM), 5/6 — Composed: Copy (GDI), 1/2 — Legacy (старые API).
+    # Показывается в большом виде рядом с разрешением (Build-Overlay.ps1)
+    Src 'PresentMode' 'PresentMon' 'PresentMode' '' '%.0f'
+    Src 'PmIFlip' 'HAL' 'Stub' '' '' 'PresentMode == 3'
+    Src 'PmMpo' 'HAL' 'Stub' '' '' 'PresentMode == 8'
+    Src 'PmComposed' 'HAL' 'Stub' '' '' 'PresentMode == 4'
+    Src 'PmCopy' 'HAL' 'Stub' '' '' '(PresentMode == 5) + (PresentMode == 6)'
+    Src 'PmLegacy' 'HAL' 'Stub' '' '' '(PresentMode == 1) + (PresentMode == 2)'
 
     Src 'CPU usage' 'HAL' 'CPU usage' '%'
     Src 'CPU usage max' 'HAL' 'CPU usage max' '%'

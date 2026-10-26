@@ -112,6 +112,23 @@ a copy of the sensor with the formula `(StyleFull) ? (x) : 0`: the sensor value 
 
 > Running `install.bat` again rebuilds the file and overwrites manual edits — keep your version under another name.
 
+## Present Mode
+
+The `fps.res` layer (the resolution line): `<RES>` plus the frame presentation mode. The `PresentMode` source is a
+PresentMon counter (bundled with RTSS) holding the `PM_PRESENT_MODE` code (`SDK\Include\PresentMon\PresentMonAPI.h`
+in the RTSS folder):
+
+| Code | PresentMon mode | Source | In the overlay |
+|---|---|---|---|
+| 3 | Hardware: Independent Flip | `PmIFlip` | green `iFlip` |
+| 8 | Hardware Composed: Independent Flip (MPO hardware plane) | `PmMpo` | green `iFlip MPO` |
+| 4 | Composed: Flip (through DWM) | `PmComposed` | yellow `Composed` |
+| 5, 6 | Composed: Copy with GPU / CPU GDI | `PmCopy` | red `Composed Copy` |
+| 1, 2 | Hardware: Legacy Flip / Copy to front buffer | `PmLegacy` | grey `Legacy` |
+
+While the mode is unknown (0 — e.g. no game), the line shows only the resolution. The variants are chained as
+`<IF PmIFlip>…<IF PmMpo>…<IF>`: `<IF>` blocks do not nest, each one closes the previous.
+
 ## Frame generation
 
 With frame generation RTSS counts the generated frames too. The sources (the **Sources** menu):

@@ -109,6 +109,22 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 
 > Повторный `install.bat` пересобирает файл и затирает ручные правки — сохраните свой вариант под другим именем.
 
+## Present Mode
+
+Слой `fps.res` (строка с разрешением): `<RES>` и режим вывода кадров. Источник `PresentMode` — счётчик PresentMon
+(входит в RTSS) с кодом режима `PM_PRESENT_MODE` (`SDK\Include\PresentMon\PresentMonAPI.h` в папке RTSS):
+
+| Код | Режим PresentMon | Источник | В оверлее |
+|---|---|---|---|
+| 3 | Hardware: Independent Flip | `PmIFlip` | зелёный `iFlip` |
+| 8 | Hardware Composed: Independent Flip (аппаратный слой MPO) | `PmMpo` | зелёный `iFlip MPO` |
+| 4 | Composed: Flip (через DWM) | `PmComposed` | жёлтый `Composed` |
+| 5, 6 | Composed: Copy with GPU / CPU GDI | `PmCopy` | красный `Composed Copy` |
+| 1, 2 | Hardware: Legacy Flip / Copy to front buffer | `PmLegacy` | серый `Legacy` |
+
+Пока режим неизвестен (0 — например, нет игры), строка показывает только разрешение. Варианты идут цепочкой
+`<IF PmIFlip>…<IF PmMpo>…<IF>`: блоки `<IF>` не вкладываются, каждый закрывает предыдущий.
+
 ## Генерация кадров
 
 С генерацией кадров RTSS считает и сгенерированные кадры. Источники (меню **Источники**):
