@@ -86,7 +86,7 @@ instead of Afterburner.
 
 Compact line: `FPS current ↓1% low ↑max` · FPS graph · `CPU total/↑busiest thread` · per-thread load · CPU temperature ·
 `average/↑max clock` · `GPU load, temperature, VRAM used/total` · `RAM used/total`.
-Its FPS graph has one point per second, about 80 seconds of history (like Steam); thread bars turn yellow from 70 %
+Its FPS graph has one point per update (twice a second), about 40 seconds of history (like Steam); thread bars turn yellow from 70 %
 and red from 90 % load.
 
 ### Frame generation

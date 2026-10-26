@@ -1,15 +1,16 @@
-// RTSS Overlay Preset — framerate of the foreground 3D application, once per second, from RTSS shared memory.
+// RTSS Overlay Preset — framerate of the foreground 3D application per sensor update (500 ms), from RTSS shared memory.
 //
 // The overlay's own FPS graph (<G=Framerate>) adds a point per frame, so at 150 FPS it covers half a second and
-// jitters. A graph of this sensor gets one point per overlay refresh (1 s) and shows the last minute or so, like the
-// Steam performance monitor. The value is RTSS's own "framerate calculated once per second":
+// jitters. A graph of this sensor gets one point per overlay refresh (500 ms) and shows the last half a minute or so,
+// like the Steam performance monitor. The value is the average over the frames RTSS added to its frame time ring
+// buffer since the previous update (dwStatFrameTimeBuf, 1024 entries in microseconds, the newest at
+// dwStatFrameTimeBufPos); on the first update of an application — RTSS's own "framerate calculated once per second",
 // 1000 * dwFrames / (dwTime1 - dwTime0) of the last foreground application (RTSS SDK, RTSSSharedMemory.h).
 //
-// The same for frame time: the slowest frame of the last second, from RTSS's frame time ring buffer
-// (dwStatFrameTimeBuf, 1024 entries in microseconds, the newest at dwStatFrameTimeBufPos) — a slow graph that still
-// shows every stutter as a spike.
+// The same buffer gives the slowest frame since the previous update — a slow graph that still shows every stutter as
+// a spike.
 //
-// Exported sensors: /overlay-preset/fps/data/0 "Framerate (1 s)", /overlay-preset/fps/data/1 "Frametime max (1 s)", ms.
+// Exported sensors: /overlay-preset/fps/data/0 "Framerate", /overlay-preset/fps/data/1 "Frametime max", ms.
 using System;
 using System.Globalization;
 using System.Text;
@@ -52,10 +53,10 @@ namespace Exporter
 				return "";
 
 			string xml = "<hardware>\n<id>/overlay-preset/fps</id><name>Framerate</name><type>Cpu</type>\n" +
-						 "<sensor><id>/overlay-preset/fps/data/0</id><name>Framerate (1 s)</name><type>Data</type><value>" +
+						 "<sensor><id>/overlay-preset/fps/data/0</id><name>Framerate</name><type>Data</type><value>" +
 						 fps.ToString("F1", CultureInfo.InvariantCulture) + "</value></sensor>\n";
 			if (ftMax > 0)
-				xml += "<sensor><id>/overlay-preset/fps/data/1</id><name>Frametime max (1 s)</name><type>Data</type><value>" +
+				xml += "<sensor><id>/overlay-preset/fps/data/1</id><name>Frametime max</name><type>Data</type><value>" +
 					   ftMax.ToString("F1", CultureInfo.InvariantCulture) + "</value></sensor>\n";
 			return xml + "</hardware>\n";
 		}
@@ -98,19 +99,23 @@ namespace Exporter
 
 					fps = 1000.0 * frames / (time1 - time0);
 
-					// frames added to the ring buffer since the previous call (~1 s ago)
+					// frames added to the ring buffer since the previous call (UpdateTimer.PERIOD ago)
 					uint pos = view.ReadUInt32(entry + APP_FT_POS) % FT_BUF_SIZE;
 					if (pid == s_lastPid)
 					{
 						uint added = (pos + FT_BUF_SIZE - s_lastPos) % FT_BUF_SIZE;
 						uint max = 0;
+						ulong sum = 0;
 						for (uint k = 0; k < added; k++)
 						{
 							uint ft = view.ReadUInt32(entry + APP_FT_BUF + 4 * ((pos + FT_BUF_SIZE - k) % FT_BUF_SIZE));
+							sum += ft;
 							if (ft > max)
 								max = ft;
 						}
 						ftMax = max / 1000.0;
+						if (sum > 0)
+							fps = 1000000.0 * added / sum;
 					}
 					s_lastPid = pid;
 					s_lastPos = pos;

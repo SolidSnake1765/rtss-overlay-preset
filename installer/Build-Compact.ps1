@@ -59,7 +59,7 @@ function Get-CompactParts($Report) {
     Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * (GpuAltRatio >= 1.5)) : 0'
     Src 'FgRaw' 'HAL' 'Stub' '' '' '(DrvFG + GameFG) > 0'
     # признак «мигает» (в Witcher 3 с модом GpuAltRatio гуляет около 2) — FG, если он был большую часть последних 5 с
-    Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,5) >= 0.6'
+    Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,10) >= 0.6'    # 10 обновлений оверлея по 500 мс = 5 с
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
 
@@ -73,7 +73,7 @@ function Get-CompactParts($Report) {
         Src "Warm$t" 'HAL' "CPU$t usage" '' '' 'x >= 70'
         Src "Hot$t" 'HAL' "CPU$t usage" '' '' 'x >= 90'
     }
-    # FPS раз в секунду от самого RTSS (Exporter.dll читает общую память RTSS) — для плавного графика за ~80 с
+    # FPS за последние полсекунды из буфера кадров RTSS (Exporter.dll читает общую память RTSS) — для плавного графика за ~40 с
     Src 'FpsSec' 'LHM' '/overlay-preset/fps/data/0' 'FPS' '%.0f'
     # оверлей у нижнего края экрана (PositionY < 0 в профиле RTSS, Exporter.dll) — строка переезжает вниз рамки
     # оверлея (CompactTop / CompactBottom, Build-Overlay.ps1)
@@ -116,7 +116,7 @@ function Get-CompactParts($Report) {
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox>~<IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
-    # график FPS: точка раз в секунду (FpsSec), 40 единиц ≈ последние 80 с — плавно, как у Steam; встроенный
+    # график FPS: точка на каждое обновление оверлея, 500 мс (FpsSec), 40 единиц ≈ последние 40 с — плавно, как у Steam; встроенный
     # <G=Framerate> добавлял точку на каждый кадр и при 150 FPS показывал полсекунды
     $parts.Add("<C=$($P.Graph)><G=FpsSec,40,9,1,0,0,90><C=$($P.Value)>")
     # CPU: «CPU 36%/↑91% ▮▮▮ 52°C 5.03/↑5.42 GHz»

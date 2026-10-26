@@ -35,7 +35,7 @@ namespace Exporter
 		// statically linked FSR 3 (FidelityFX SDK 1.x frame interpolation API)
 		static readonly byte[] s_staticMarker = Encoding.ASCII.GetBytes("ffxFrameInterpolation");
 
-		const int RECHECK_CALLS = 5;			// modules of the same process are re-read every 5 calls (~5 s)
+		const int RECHECK_CALLS = 10;			// modules of the same process are re-read every 10 calls (~5 s)
 
 		static int s_pid;
 		static int s_calls;

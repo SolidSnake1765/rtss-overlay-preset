@@ -1,12 +1,12 @@
 // RTSS Overlay Preset — Exporter.dll for RTSS LHMDataProvider.
 //
 // RTSS (7.3.7+) ships LHMDataProvider.exe, which loads Importer.dll, which calls
-// Exporter.ExportClass.ExportToXML(bool) once per second and publishes the returned XML
+// Exporter.ExportClass.ExportToXML(bool) once per second (this DLL makes it every 500 ms, UpdateTimer.cs) and publishes the returned XML
 // through shared memory to the OverlayEditor plugin. This is an independent implementation
 // of that contract on top of LibreHardwareMonitorLib, plus an extra "/overlay-preset/memory" block
 // with the memory data rate and the live DRAM timings, and "/overlay-preset/fg" — whether the foreground
 // game has a frame generation library (FrameGenProbe.cs), and "/overlay-preset/fps" — the foreground game's
-// framerate once per second from RTSS shared memory (RtssFramerate.cs), and "/overlay-preset/osd" — where RTSS
+// framerate per sensor update from RTSS shared memory (RtssFramerate.cs), and "/overlay-preset/osd" — where RTSS
 // places the overlay (OsdPosition.cs).
 //
 // XML contract (parsed by OverlayEditor's LHMParser):
@@ -45,6 +45,8 @@ namespace Exporter
 		/// <summary>Called by RTSS Importer.dll. bUninit = true on provider shutdown.</summary>
 		public static string ExportToXML(bool bUninit)
 		{
+			UpdateTimer.Apply();		// 1000 → 500 ms (UpdateTimer.cs)
+
 			StringBuilder xml = new StringBuilder(32 * 1024);
 
 			try

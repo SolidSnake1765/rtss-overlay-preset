@@ -62,8 +62,8 @@ line main: `install.bat -Style Compact`.
 **Screen corner.** The corner keys are HotkeyHandler "profile modifiers" (Profile modifier 1–4): on a press RTSS
 flips the sign of the overlay position in the global profile (`PositionX` / `PositionY`, XOR with `-2`: `1` ↔ `-1`).
 A negative coordinate is an offset from the right or bottom edge, so the overlay sticks to the corner at any
-resolution. It works instantly, without a restart, and is remembered; the compact line catches up with the bottom edge within a
-second. The installer takes two free modifiers; if all
+resolution. It works instantly, without a restart, and is remembered; the compact line catches up with the bottom edge within half
+a second. The installer takes two free modifiers; if all
 four are taken, the corner keys are not assigned. You can also simply drag the overlay on the screen preview in the
 RTSS window. If a game has its own RTSS profile (not Global), the position comes from it and the corner keys do not
 affect that game.
