@@ -14,7 +14,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Product   = 'RTSS Overlay Preset'
-$Version   = '1.0'
+$Version   = '1.1'
 $Root      = Split-Path -Parent $PSScriptRoot
 $Payload   = Join-Path $Root 'payload'
 $DataDir   = Join-Path $env:ProgramData 'RTSS-Overlay-Preset'
@@ -127,7 +127,7 @@ try {
     # оба вида в одном файле (большой + компактная строка в стиле Steam), переключаются клавишей $StyleKey;
     # рядом — картинка со стрелками ↓↑ для компактной строки
     $log = @(Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $report @{
-        Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $script:StyleKey; MainStyle = $Style; FgDebug = [bool]$FgDebug } $ovlFile)
+        Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $script:StyleKey; MainStyle = $Style; FgDebug = [bool]$FgDebug; Version = $Version } $ovlFile)
     Copy-Item (Join-Path $Root 'overlay\rtss-overlay-preset-icons.png') (Split-Path $ovlFile) -Force
     $oldCompact = Join-Path $rtss.Dir 'Plugins\Client\Overlays\rtss-overlay-preset-compact.ovl'    # отдельный файл версии 0.x (он в бэкапе)
     if (Test-Path $oldCompact) { Remove-Item $oldCompact -Force }
@@ -153,6 +153,10 @@ try {
     Say (T "Готово. Оверлей включён (шрифт $Font). Журнал: $LogFile" "Done. The overlay is enabled (font $Font). Log: $LogFile") -Color Green
     Say ((T 'Два вида — большой и компактная строка в стиле Steam; переключение в игре: ' 'Two styles — full and a compact Steam-style line; switch in game with ') + (Format-Hotkey $script:StyleKey))
     Say ((T 'Основной вид (после запуска RTSS): ' 'Main style (after RTSS starts): ') + $(if ($Style -eq 'Compact') { T 'компактная строка' 'compact line' } else { T 'большой' 'full' }))
+    if ($FgDebug) {
+        Say ''
+        Say (T 'Включены отладочные строки справа от оверлея. Запустите игру, в которой что-то не так, сделайте скриншот (Ctrl+Alt+Num 2) и приложите его к issue на GitHub. Обычный вид вернёт install.bat.' 'Debug lines are on, to the right of the overlay. Start the game where something is wrong, take a screenshot (Ctrl+Alt+Num 2) and attach it to a GitHub issue. install.bat brings back the normal view.') -Color Yellow
+    }
     Say (T 'Удалить и вернуть как было: uninstall.bat' 'To remove and restore: uninstall.bat')
 }
 catch {

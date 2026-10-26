@@ -351,14 +351,20 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
     Set-Key $general 'Layers' ([string]$allLayers.Count)
     Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # значки ↓↑≈×
     if ($Options.FgDebug) {
-        # отладка генерации кадров: сырые признаки справа от оверлея (install.bat -FgDebug, Make-Overlay -FgDebug)
-        $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'
-            Text = 'lib %FgLib% how %FgHow%  rhythm %FgRhythm% mul %FgMul% x%FgN%   ' +
-                   'pres %FrameratePresented% disp %FramerateDisplayed%  drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG%  native %NativeFPS%  pm %PresentMode%   ' +
-                   'nat %NatAvg%/%NatLow1%/%NatLow01% max %NatMax%  rtss %RtssAvg%/%RtssLow1%/%RtssLow01%' }
-        $dbg = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
-        foreach ($k in $kv.Keys) { $dbg.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
-        $allLayers += $dbg; $dbg.Name = "Layer$($allLayers.Count - 1)"
+        # отладочные строки справа от оверлея (install-debug.bat, install.bat -FgDebug, Make-Overlay -FgDebug): сырые признаки
+        # генерации кадров, частоты кадров из PresentMon и RTSS, статистика — по скриншоту видно, на каком шаге ошибка.
+        # Первая строка начинается с «lib» — её читает scratchpad-скрипт osdread.ps1 из общей памяти RTSS
+        $ver = if ($Options.Version) { "RTSS Overlay Preset $($Options.Version) debug   " } else { 'debug   ' }
+        $lines = @(
+            "lib %FgLib% how %FgHow%  rhythm %FgRhythm% mul %FgMul% x%FgN%  fg %IsFG% game %GameFG% drv %DrvFG%  pm %PresentMode%",
+            "$($ver)fps: rtss %RtssFps% pres %FrameratePresented% disp %FramerateDisplayed% total %TotalFPS% native %NativeFPS%",
+            'stats real %NatAvg%/%NatLow1%/%NatLow01% max %NatMax%   rtss %RtssAvg%/%RtssLow1%/%RtssLow01%')
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 8 * $i; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'; Text = $lines[$i] }
+            $dbg = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
+            foreach ($k in $kv.Keys) { $dbg.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
+            $allLayers += $dbg; $dbg.Name = "Layer$($allLayers.Count - 1)"
+        }
         Set-Key $general 'Layers' ([string]$allLayers.Count)
     }
     return @($head) + $allSources + $allLayers

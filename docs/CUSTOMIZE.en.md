@@ -195,7 +195,7 @@ in your own layers:
 | `/overlay-preset/fps/data/2`, `3`, `4`, `8` | AVG, 1% low, 0.1% low and max (best second) of the real frames: RTSS frame times summed by the frame generation multiplier (`NativeStats.cs`); RTSS's rules — lows in integral mode (the frame at which the sum of the slowest frames reaches 1% / 0.1% of the total time) or percentile per the RTSS `PercentileCalc` setting; reset together with RTSS statistics |
 | `/overlay-preset/fps/data/5`, `6`, `7` | RTSS's own AVG, 1% low, 0.1% low (for the warning colours when there is no frame generation) |
 | `/overlay-preset/osd/data/0`, `data/1` | the overlay position on screen — `PositionX`, `PositionY` from the RTSS profile (the game's profile if it sets them, otherwise Global); negative means from the right / bottom edge |
-| `/overlay-preset/fg/data/1` | how the library was found (for the `-FgDebug` line): 1 loaded module, 2 DLL in the game folder, 3 FSR 3 inside the exe, 0 not found; +10 — module list closed (anti-cheat) |
+| `/overlay-preset/fg/data/1` | how the library was found (for the `install-debug.bat` debug lines): 1 loaded module, 2 DLL in the game folder, 3 FSR 3 inside the exe, 0 not found; +10 — module list closed (anti-cheat) |
 | `/overlay-preset/fgr/data/0`, `1`, `2` | frame generation rhythm, multiplier (2…8, 0 — none) and the multiplier over 5 s — from PresentMon frames in shared memory |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 

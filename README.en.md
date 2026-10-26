@@ -13,7 +13,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 |:---:|:---:|
 | <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Full style close-up"> |
 
-**Compact line** in the style of Steam Performance Monitor — in game (real FPS 51, `FG≈103` with frame generation) and close-up:
+**Compact line** in the style of Steam Performance Monitor — in game (real FPS 51, 103 total with frame generation) and close-up:
 
 <img src="docs/images/compact-in-game.jpg" alt="Compact line in game">
 
@@ -32,7 +32,8 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Two fonts:** Bahnschrift (default) and Unispace (classic).
 - **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
 - **Native FPS under frame generation** (both styles): like Steam, it shows the game's real frame rate and the total
-  with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
+  with DLSS FG / FSR FG / AFMF / Smooth Motion, the multiplier (`FG≈×3`, ×2 to ×8), and AVG / 1% / 0.1% low from the
+  real frames — see [below](#frame-generation).
 - **Present Mode** — how the game's frames reach the screen: green — directly, with the lowest latency; yellow and
   red — through the Windows desktop, with an extra frame of latency. Shown in the full style after the resolution —
   see [below](#present-mode).
@@ -44,7 +45,7 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
    MSI Afterburner is not needed.
 2. Download the archive (**Code → Download ZIP** or the latest release) and unpack it.
 3. Run **`install.bat`** and confirm the administrator prompt.
-4. Pick the language, font and hotkeys — the installer does the rest. Both overlay styles are installed.
+4. Pick the language, font, main style and hotkeys — the installer does the rest. Both overlay styles are installed.
 
 Details, including a **manual install** without the installer: [docs/INSTALL.en.md](docs/INSTALL.en.md).
 **Customizing the overlay:** [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md).
@@ -129,10 +130,9 @@ about 2.5 s late, and the graphs stutter even with a display delay, so the RTSS 
 
 Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with OptiScaler (DLSS frame generation
 → FSR 3.1) at ×2, ×3, ×4, ×5 and ×6 — the multiplier is detected correctly and the real FPS is the total divided by it;
-no false positives without frame generation. AFMF and Smooth
-Motion are not tested yet. Steam detects frame generation
-differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FSR 3.0 built into the game (as in Wukong)
-is invisible to it.
+no false positives without frame generation; the total and real FPS match the Steam overlay. AFMF and Smooth Motion
+are not tested yet. Steam detects frame generation differently — it hooks the DLSS and FSR 3.1+ library calls inside
+the game; FSR 3.0 built into the game (as in Wukong) is invisible to it.
 
 How it works and how to change the thresholds — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#frame-generation).
 
@@ -166,13 +166,27 @@ A detailed write-up with pictures, MPO checks and fixes: ["Presentation Model in
 
 ## Something is wrong
 
-Run `installer\Detect.ps1 -Export` (PowerShell as administrator) and attach the generated
-`installer\hardware-report.json` to an [issue](../../issues).
+**Debug version — for a problem report.** If frame generation is not detected, the FPS does not match other overlays
+or something else looks wrong, install the preset with **`install-debug.bat`** instead of `install.bat`. It is the same
+installer, but three lines with raw data appear to the right of the overlay:
 
-**Frame generation is on, but the overlay does not see it.** Reinstall the preset with `install.bat -FgDebug` — a line
-with the raw signs appears to the right of the overlay (`lib` — library found, `rhythm` — frame rhythm, `mul` and
-`x` — multiplier). Take a screenshot in the game with frame generation and attach it to an [issue](../../issues)
-with the game and GPU name. Running `install.bat` again brings back the normal view.
+```
+lib 1 how 1  rhythm 1.62 mul 3 x3  fg 1 game 1 drv 0  pm 3
+RTSS Overlay Preset 1.1 debug   fps: rtss 224 pres 210 disp 208 total 224 native 75
+stats real 76/52/41 max 78   rtss 224/80/56
+```
+
+- `lib` — the game has a frame generation library, `how` — how it was found (1 — loaded, 12 — file in the game folder, anti-cheat);
+- `rhythm` — frame rhythm (usually 1.3–2 with frame generation, about 0.1 without), `mul` and `x` — multiplier;
+- `fg`, `game`, `drv` — whether the frame generation sign is on; `pm` — Present Mode;
+- `fps` — frame rate from RTSS and PresentMon, total and real;
+- `stats` — AVG/1%/0.1% low from the real frames and RTSS's own.
+
+Start the game with the problem, take a screenshot (Ctrl+Alt+Num 2) and attach it to an [issue](../../issues) with the
+game, GPU and frame generation mode. Running `install.bat` again brings back the normal view.
+
+If the hardware or sensors were detected wrong, run `installer\Detect.ps1 -Export` (PowerShell as administrator) and
+attach the generated `installer\hardware-report.json` to an [issue](../../issues).
 
 **Frame generation is no longer detected, or "FG" flickers with a wrong FPS.** Frame data comes from Windows event
 tracing (via PresentMon). If Windows has not been restarted for a long time and frame monitoring tools were started
