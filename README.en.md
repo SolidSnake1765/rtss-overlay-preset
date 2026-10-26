@@ -56,6 +56,8 @@ Assigned during the install — just press the combination you want.
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off in game |
 | Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. They are counted from game start, and loading screens, cutscenes and menus skew them — press it after the level loads and the statistics restart from gameplay only. For the first seconds after a reset 1% and 0.1% show 0 — that is normal |
 | Screenshot | Ctrl+Alt+Num 2 | captures the screen with the overlay into `Pictures\RTSS Screenshots` |
+| Overlay: left ↔ right edge | Ctrl+Alt+Num 4 | moves the overlay to the opposite screen edge |
+| Overlay: top ↕ bottom | Ctrl+Alt+Num 8 | moves the overlay to the top or bottom edge; together with the previous one — to any corner |
 | Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
 After RTSS restarts, the main style is enabled — the full one (to make the compact line main: `install.bat -Style Compact`).

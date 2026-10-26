@@ -6,7 +6,8 @@
 // of that contract on top of LibreHardwareMonitorLib, plus an extra "/overlay-preset/memory" block
 // with the memory data rate and the live DRAM timings, and "/overlay-preset/fg" — whether the foreground
 // game has a frame generation library (FrameGenProbe.cs), and "/overlay-preset/fps" — the foreground game's
-// framerate once per second from RTSS shared memory (RtssFramerate.cs).
+// framerate once per second from RTSS shared memory (RtssFramerate.cs), and "/overlay-preset/osd" — where RTSS
+// places the overlay (OsdPosition.cs).
 //
 // XML contract (parsed by OverlayEditor's LHMParser):
 //   <hardware>\n<id>..</id><name>..</name><type>..</type>\n
@@ -77,6 +78,14 @@ namespace Exporter
 			try
 			{
 				xml.Append(RtssFramerate.ToXml());
+			}
+			catch (Exception)
+			{
+			}
+
+			try
+			{
+				xml.Append(OsdPosition.ToXml());		// after RtssFramerate: uses its foreground application
 			}
 			catch (Exception)
 			{

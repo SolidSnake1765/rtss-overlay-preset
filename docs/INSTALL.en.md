@@ -50,12 +50,23 @@ Everything else (frame limiter, Reflex, stealth mode, application detection) is 
 | Show / hide overlay | Ctrl+Alt+Num 0 | turns the overlay on and off |
 | Reset statistics | Ctrl+Alt+Num 1 | resets average FPS, 1% and 0.1% low. RTSS counts them from game start, so loading screens, cutscenes and menus drag them down. Press it after the level loads — the statistics restart from gameplay only |
 | Screenshot | Ctrl+Alt+Num 2 | screen capture with the overlay into `Pictures\RTSS Screenshots` (PNG) |
+| Overlay: left ↔ right edge | Ctrl+Alt+Num 4 | moves the overlay to the opposite screen edge |
+| Overlay: top ↕ bottom | Ctrl+Alt+Num 8 | moves the overlay to the top or bottom edge; together with the previous one — to any corner |
 | Switch style | Scroll Lock | cycles: full → compact line → full. A single key only, no Ctrl/Alt — that is how RTSS counts presses; any key games do not use works (Scroll Lock, Pause) |
 
 Both styles live in one file, and which one is shown is decided by the `key()` formula — a key press counter kept by
 the HotkeyHandler plugin (so it must be enabled). The counter tracks a single key and does not see Ctrl/Alt, so a
 combination cannot be used here. After RTSS restarts, the main style is enabled — the full one; to make the compact
 line main: `install.bat -Style Compact`.
+
+**Screen corner.** The corner keys are HotkeyHandler "profile modifiers" (Profile modifier 1–4): on a press RTSS
+flips the sign of the overlay position in the global profile (`PositionX` / `PositionY`, XOR with `-2`: `1` ↔ `-1`).
+A negative coordinate is an offset from the right or bottom edge, so the overlay sticks to the corner at any
+resolution. It works instantly, without a restart, and is remembered; the compact line catches up with the bottom edge within a
+second. The installer takes two free modifiers; if all
+four are taken, the corner keys are not assigned. You can also simply drag the overlay on the screen preview in the
+RTSS window. If a game has its own RTSS profile (not Global), the position comes from it and the corner keys do not
+affect that game.
 
 To change them later: RTSS → **Setup** → **Plugins** → **HotkeyHandler.dll** → **Setup**, or simply run
 `install.bat` again.

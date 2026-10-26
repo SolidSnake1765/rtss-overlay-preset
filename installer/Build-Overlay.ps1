@@ -303,9 +303,27 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
     # источники компактной строки: одноимённые уже есть в большом виде — те же данные
     $names = @($sources | ForEach-Object { Get-Key $_ 'Name' })
     foreach ($s in $parts.Sources) { if ((Get-Key $s 'Name') -notin $names) { $new.Add($s) } }
-    foreach ($l in $parts.Layers) { Set-Key $l 'VisibilitySource' 'StyleCompact' }
 
-    $allSources = [object[]]$sources + $new.ToArray(); $allLayers = [object[]]$layers + $parts.Layers.ToArray()
+    # RTSS прижимает к краю экрана рамку всего оверлея, а OverlayEditor передаёт ему и размеры скрытых слоёв —
+    # рамка всегда высотой с большой вид. Поэтому, когда оверлей у нижнего края, компактная строка рисуется копией
+    # у низа этой рамки.
+    $height = ($layers | ForEach-Object {
+        $w = [int](Get-Key $_ 'ExtentX'); $h = [int](Get-Key $_ 'ExtentY')
+        if ($w -and $h) { [int](Get-Key $_ 'PositionY') + $h } } | Measure-Object -Maximum).Maximum
+    $new.Add((New-OvlSource 'CompactTop' 'HAL' 'Stub' '' '' '(StyleCompact) ? (OsdBottom == 0) : 0'))
+    $new.Add((New-OvlSource 'CompactBottom' 'HAL' 'Stub' '' '' '(StyleCompact) ? (OsdBottom != 0) : 0'))
+    $compactLayers = New-Object System.Collections.Generic.List[object]
+    foreach ($l in $parts.Layers) {
+        Set-Key $l 'VisibilitySource' 'CompactTop'
+        $b = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
+        foreach ($k in $l.Keys) { $b.Keys.Add([pscustomobject]@{ K = $k.K; V = $k.V }) }
+        Set-Key $b 'Name' ((Get-Key $l 'Name') + '.bottom')
+        Set-Key $b 'PositionY' ([string]($height - [int](Get-Key $l 'ExtentY')))
+        Set-Key $b 'VisibilitySource' 'CompactBottom'
+        $compactLayers.Add($l); $compactLayers.Add($b)
+    }
+
+    $allSources = [object[]]$sources + $new.ToArray(); $allLayers = [object[]]$layers + $compactLayers.ToArray()
     for ($i = 0; $i -lt $allSources.Count; $i++) { $allSources[$i].Name = "Source$i" }
     for ($i = 0; $i -lt $allLayers.Count; $i++) { $allLayers[$i].Name = "Layer$i" }
     $general = $head | Where-Object Name -eq 'General'

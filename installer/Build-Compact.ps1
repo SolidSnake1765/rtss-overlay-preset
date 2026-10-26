@@ -75,6 +75,10 @@ function Get-CompactParts($Report) {
     }
     # FPS раз в секунду от самого RTSS (Exporter.dll читает общую память RTSS) — для плавного графика за ~80 с
     Src 'FpsSec' 'LHM' '/overlay-preset/fps/data/0' 'FPS' '%.0f'
+    # оверлей у нижнего края экрана (PositionY < 0 в профиле RTSS, Exporter.dll) — строка переезжает вниз рамки
+    # оверлея (CompactTop / CompactBottom, Build-Overlay.ps1)
+    Src 'OsdY' 'LHM' '/overlay-preset/osd/data/1'
+    Src 'OsdBottom' 'HAL' 'Stub' '' '' 'OsdY < 0'
     if ($ids.'cpu.temp') { Src 'CPU temperature' 'LHM' $ids.'cpu.temp' 'C' }
     $clocks = @(if ($ids.'cpu.clocks') { $ids.'cpu.clocks' -split ',' })
     if ($clocks.Count) {

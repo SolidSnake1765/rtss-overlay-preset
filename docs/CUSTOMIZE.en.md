@@ -56,7 +56,8 @@ thresholds.
 
 ## Compact line
 
-The compact line is the file's last layer (`compact`): the whole line is RTSS hypertext in its **Text** field:
+The compact line is the file's last two layers: `compact` and its copy `compact.bottom` (see below); the whole line is
+RTSS hypertext in the **Text** field:
 `<C=RRGGBB>` — color, `<S=48>…<S=80>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
 arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
 `<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. The FPS graph is `<G=FpsSec,…>`: one point per second, about 80 s of history. Thread bars turn yellow from 70 % and red from 90 % load (`Warm<n>`, `Hot<n>` sources). Block colors: FPS `E8836B`, CPU `E5C35C`,
@@ -64,6 +65,11 @@ GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; t
 Background: the layer has a fixed height of 11 with the text centred, and the line's last tag `<I=8,7,0,0,2,2>` is an
 invisible spacer (a transparent corner of the arrow image): without it RTSS makes the background shorter than the
 text and the last "GB" sticks out.
+The bottom copy: RTSS anchors the bounding box of the whole overlay to the screen edge, and OverlayEditor passes it the
+extents of the hidden full style layers too — the box is always as tall as the full style. When the overlay is at the
+bottom edge (negative `PositionY` in the RTSS profile — sensor `/overlay-preset/osd/data/1`), `compact.bottom` is shown
+at the bottom of the box (sources `OsdBottom`, `CompactTop`, `CompactBottom`). When you change the line's text, change
+it in both layers.
 
 ## How style switching works
 
@@ -145,6 +151,7 @@ in your own layers:
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
 | `/overlay-preset/fps/data/0` | the foreground game's FPS once per second — from RTSS shared memory (the same calculation as RTSS itself); drives the compact line's smooth FPS graph |
 | `/overlay-preset/fps/data/1` | the slowest frame of the last second, ms — from RTSS's frame time buffer (not used by the overlay right now) |
+| `/overlay-preset/osd/data/0`, `data/1` | the overlay position on screen — `PositionX`, `PositionY` from the RTSS profile (the game's profile if it sets them, otherwise Global); negative means from the right / bottom edge |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show

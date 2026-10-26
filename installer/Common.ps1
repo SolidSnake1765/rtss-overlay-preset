@@ -263,6 +263,24 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
            Title = (T 'Скриншот' 'Screenshot')
            Help  = (T 'Снимок экрана игры вместе с оверлеем.' 'Captures the game screen together with the overlay.') }
     )
+    # Угол экрана: «модификаторы профиля» HotkeyHandler (PPM1..4). По нажатию PositionX или PositionY глобального
+    # профиля RTSS XOR -2: 1 ↔ -1, а отрицательная координата — отступ от правого / нижнего края. RTSS применяет
+    # сразу, без перезапуска. Слот — уже наш (то же свойство с XOR) или первый свободный.
+    $free = @(1..4 | Where-Object { -not (Read-Cfg "PPM${_}Property") -and -not (Current "PPM${_}Hotkey" 0) })
+    $corner = @(
+        @{ Property = 'PositionX'; Default = 0x00060064; Desc = 'RTSS Overlay Preset: left <-> right'
+           Title = (T 'Оверлей: левый ↔ правый край' 'Overlay: left ↔ right edge')
+           Help  = (T 'Переносит оверлей к противоположному краю экрана. Вместе со следующей клавишей — в любой угол. Срабатывает сразу и запоминается для всех игр.' 'Moves the overlay to the opposite screen edge. Together with the next key — to any corner. Works instantly and is remembered for all games.') },
+        @{ Property = 'PositionY'; Default = 0x00060068; Desc = 'RTSS Overlay Preset: top <-> bottom'
+           Title = (T 'Оверлей: верх ↕ низ' 'Overlay: top ↕ bottom')
+           Help  = (T 'Переносит оверлей к верхнему или нижнему краю экрана.' 'Moves the overlay to the top or bottom screen edge.') }
+    )
+    foreach ($c in $corner) {
+        $slot = 1..4 | Where-Object { (Read-Cfg "PPM${_}Property") -eq $c.Property -and (Read-Cfg "PPM${_}Type") -eq '2' } | Select-Object -First 1
+        if (-not $slot -and $free.Count) { $slot = $free[0]; $free = @($free | Select-Object -Skip 1) }
+        if ($slot) { $items += $c + @{ Key = "PPM${slot}Hotkey"; Ppm = $slot } }
+        else { Warn (T "  Все 4 «модификатора профиля» HotkeyHandler заняты — клавиша «$($c.Title)» не назначена." "  All 4 HotkeyHandler profile modifiers are taken — «$($c.Title)» is not assigned.") }
+    }
     $items += @{ Key = ''; Default = $style; Single = $true
        Title = (T 'Переключить вид оверлея' 'Switch overlay style')
        Help  = (T 'По кругу: большой → компактная строка → большой. Только одна клавиша, без Ctrl/Alt — RTSS считает нажатия одной клавиши (они действуют и в сочетаниях). Удобна та, что в играх не нужна: Scroll Lock, Pause.' 'Cycles: full → compact line → full. A single key only, no Ctrl/Alt — RTSS counts presses of one key (presses inside combinations count too). Pick one games do not use: Scroll Lock, Pause.') }
@@ -290,6 +308,15 @@ function Set-Hotkeys([string]$RtssDir, [switch]$Defaults) {
         Say "    $($items[$n].Help)" -Color DarkGray
         if ($items[$n].Single) { $script:StyleKey = $values[$n] -band 0xFF }
         else { Set-IniValue $cfg 'Settings' $items[$n].Key ('{0:X8}' -f $values[$n]) }
+        if ($items[$n].Ppm) {
+            # профиль '' — глобальный; тип 2 — XOR
+            $p = "PPM$($items[$n].Ppm)"
+            Set-IniValue $cfg 'Settings' "${p}Desc" $items[$n].Desc
+            Set-IniValue $cfg 'Settings' "${p}Profile" ''
+            Set-IniValue $cfg 'Settings' "${p}Property" $items[$n].Property
+            Set-IniValue $cfg 'Settings' "${p}Type" '2'
+            Set-IniValue $cfg 'Settings' "${p}Value" '-2'
+        }
     }
 
     # скриншоты: формат и папка, если не настроены

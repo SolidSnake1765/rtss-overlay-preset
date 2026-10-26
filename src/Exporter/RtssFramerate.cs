@@ -12,6 +12,7 @@
 // Exported sensors: /overlay-preset/fps/data/0 "Framerate (1 s)", /overlay-preset/fps/data/1 "Frametime max (1 s)", ms.
 using System;
 using System.Globalization;
+using System.Text;
 using System.IO.MemoryMappedFiles;
 
 namespace Exporter
@@ -30,12 +31,16 @@ namespace Exporter
 
 		// RTSS_SHARED_MEMORY_APP_ENTRY offsets
 		const int APP_PID		= 0;
+		const int APP_NAME		= 4;		// char szName[MAX_PATH], full path of the executable
 		const int APP_TIME0		= 268;
 		const int APP_TIME1		= 272;
 		const int APP_FRAMES	= 276;
 		const int APP_FT_BUF	= 924;		// DWORD dwStatFrameTimeBuf[1024], microseconds
 		const int APP_FT_POS	= 5020;		// index of the newest entry
 		const int FT_BUF_SIZE	= 1024;
+
+		/// <summary>Path of the foreground 3D application from the last read, or null.</summary>
+		public static string ForegroundApp;
 
 		static uint s_lastPid;
 		static uint s_lastPos;
@@ -59,6 +64,7 @@ namespace Exporter
 		{
 			fps = 0;
 			ftMax = 0;
+			ForegroundApp = null;
 			try
 			{
 				using (MemoryMappedFile map = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read))
@@ -78,6 +84,11 @@ namespace Exporter
 					long entry = arrOffset + (long)index * entrySize;
 					if (view.ReadUInt32(entry + APP_PID) != pid)
 						return false;
+
+					byte[] name = new byte[260];
+					view.ReadArray(entry + APP_NAME, name, 0, name.Length);
+					int len = Array.IndexOf(name, (byte)0);
+					ForegroundApp = Encoding.Default.GetString(name, 0, len < 0 ? name.Length : len);
 
 					uint time0	= view.ReadUInt32(entry + APP_TIME0);
 					uint time1	= view.ReadUInt32(entry + APP_TIME1);
