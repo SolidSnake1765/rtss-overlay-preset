@@ -116,13 +116,13 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `GpuJump1`, `GpuJump2` | `buf(GpuActive,-1) - buf(GpuActive,-2)` и `…-3)` по модулю | скачок к соседнему кадру и через кадр |
 | `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | доля скачка от среднего времени |
 | `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | скачки именно через кадр, а не беспорядочно |
-| `GameFG` | `FgLib` и `GpuAlt >= 0.25` и `GpuAltRatio >= 2` | генерация внутри игры |
-| `IsFG` | `swavg(FgRaw,3) > 0.9` | 1 — генерация держится 3 с подряд |
+| `GameFG` | `FgLib` и `GpuAlt >= 0.25` и `GpuAltRatio >= 1.5` | генерация внутри игры |
+| `IsFG` | `swavg(FgRaw,5) >= 0.6` | 1 — генерация была большую часть последних 5 с |
 | `IsFGApprox` | генерация не драйверная | показывать `~` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | реальный FPS игры |
 
 Замеры на Black Myth: Wukong (FSR 3): `GpuAlt` с генерацией 0.43–0.6, без неё 0.04–0.07; `GpuAltRatio` 4–6
-и около 1. Пороги `0.25` и `2` — в формуле `GameFG`. `buf(Имя,-1)` — последний кадр в буфере PresentMon;
+и около 1; в Witcher 3 с модом RTX 30 FG `GpuAltRatio` гуляет около 2, поэтому порог 1.5. Пороги `0.25` и `1.5` — в формуле `GameFG`. `buf(Имя,-1)` — последний кадр в буфере PresentMon;
 `buf(x,…)` в формулах источников PresentMon не работает — только по имени источника.
 
 В тексте слоёв: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` не вкладываются (каждый следующий закрывает предыдущий),

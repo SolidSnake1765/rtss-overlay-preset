@@ -56,9 +56,10 @@ function Get-CompactParts($Report) {
     Src 'GpuAltRatio' 'HAL' 'Stub' '' '%.1f' 'swavg(GpuJump1,64) / swavg(GpuJump2,64)'
     Src 'FgLib' 'LHM' '/overlay-preset/fg/data/0'
     Src 'DrvFG' 'HAL' 'Stub' '' '' '(FrameratePresented >= 10) ? (FramerateDisplayed >= FrameratePresented * 1.5) : 0'
-    Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * (GpuAltRatio >= 2)) : 0'
+    Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * (GpuAltRatio >= 1.5)) : 0'
     Src 'FgRaw' 'HAL' 'Stub' '' '' '(DrvFG + GameFG) > 0'
-    Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,3) > 0.9'
+    # признак «мигает» (в Witcher 3 с модом GpuAltRatio гуляет около 2) — FG, если он был большую часть последних 5 с
+    Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,5) >= 0.6'
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
 

@@ -96,7 +96,7 @@ plus 45 generated. The overlay tells them apart in three ways:
    has a frame generation library (checked by the preset's `Exporter.dll`: an FG DLL or FSR 3 built into the game
    itself) **and** the frame rhythm — every second frame is much lighter for the GPU. The real FPS is then the total
    divided by two; it is an estimate, so it is marked **`FG~`**.
-3. The sign must hold for 3 seconds in a row — short spikes do not switch it on.
+3. The sign must hold for most of the last 5 seconds — short spikes do not switch it on.
 
 On screen:
 - **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
@@ -127,6 +127,11 @@ How it works and how to change the thresholds — [docs/CUSTOMIZE.en.md](docs/CU
 
 Run `installer\Detect.ps1 -Export` (PowerShell as administrator) and attach the generated
 `installer\hardware-report.json` to an [issue](../../issues).
+
+**Frame generation is no longer detected, or "FG" flickers with a wrong FPS.** Frame data comes from Windows event
+tracing (via PresentMon). If Windows has not been restarted for a long time and frame monitoring tools were started
+and closed many times, tracing can start losing events: PresentMon sees fewer frames than RTSS and the GPU time stops
+making sense. Restarting the PC helps.
 
 ## Licenses
 

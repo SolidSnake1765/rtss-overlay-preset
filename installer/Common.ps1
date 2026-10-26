@@ -26,7 +26,10 @@ function Select-Language([string]$Lang) {
 # RTSS держит LHMDataProvider и хуки; редактор оверлея сразу перезапускает провайдер, поэтому останавливаем всё.
 # Принудительное завершение ещё и не даёт RTSS перезаписать свои настройки при выходе.
 function Stop-Rtss {
-    $names = 'RTSS', 'RTSSHooksLoader', 'RTSSHooksLoader64', 'EncoderServer', 'EncoderServer64', 'LHMDataProvider'
+    # PresentMonDataProvider и консоль PresentMon переживают перезапуск RTSS — останавливаем и их, OverlayEditor
+    # запустит их заново уже с настройками нового оверлея
+    $names = 'RTSS', 'RTSSHooksLoader', 'RTSSHooksLoader64', 'EncoderServer', 'EncoderServer64', 'LHMDataProvider',
+             'PresentMonDataProvider', 'PresentMon-*'
     $running = [bool](Get-Process RTSS -ErrorAction SilentlyContinue)
     if ($running) { Say (T 'Остановка RTSS...' 'Stopping RTSS...') }
     foreach ($n in $names) { Get-Process $n -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue }
