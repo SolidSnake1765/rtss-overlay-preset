@@ -1,13 +1,15 @@
 ﻿# RTSS Overlay Preset — установщик.
 # Запуск: install.bat (сам попросит права администратора).
 # Параметры: -Lang ru|en, -Font Bahnschrift|Unispace, -Style Full|Compact (какой оверлей основной; без них — вопросы),
-#            -Defaults (горячие клавиши без вопросов), -NoRestart
+#            -Defaults (горячие клавиши без вопросов), -NoRestart,
+#            -FgDebug (справа от оверлея — строка с сырыми признаками генерации кадров, для отчёта о проблеме)
 param(
     [ValidateSet('', 'ru', 'en')][string]$Lang = '',
     [ValidateSet('', 'Bahnschrift', 'Unispace')][string]$Font = '',
     [ValidateSet('', 'Full', 'Compact')][string]$Style = '',
     [switch]$Defaults,
-    [switch]$NoRestart
+    [switch]$NoRestart,
+    [switch]$FgDebug
 )
 
 $ErrorActionPreference = 'Stop'
@@ -125,7 +127,7 @@ try {
     # оба вида в одном файле (большой + компактная строка в стиле Steam), переключаются клавишей $StyleKey;
     # рядом — картинка со стрелками ↓↑ для компактной строки
     $log = @(Build-Overlay (Join-Path $Root 'overlay\rtss-overlay-preset.template.ovl') $report @{
-        Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $script:StyleKey; MainStyle = $Style } $ovlFile)
+        Font = $Font; HasTimings = [bool]$probe.HasTimings; StyleKey = $script:StyleKey; MainStyle = $Style; FgDebug = [bool]$FgDebug } $ovlFile)
     Copy-Item (Join-Path $Root 'overlay\rtss-overlay-preset-icons.png') (Split-Path $ovlFile) -Force
     $oldCompact = Join-Path $rtss.Dir 'Plugins\Client\Overlays\rtss-overlay-preset-compact.ovl'    # отдельный файл версии 0.x (он в бэкапе)
     if (Test-Path $oldCompact) { Remove-Item $oldCompact -Force }

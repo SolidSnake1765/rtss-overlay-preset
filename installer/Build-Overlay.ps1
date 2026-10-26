@@ -337,9 +337,10 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
     Set-Key $general 'Layers' ([string]$allLayers.Count)
     Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # значки ↓↑≈
     if ($Options.FgDebug) {
-        # отладка генерации кадров: сырые признаки справа от оверлея (Make-Overlay -FgDebug)
+        # отладка генерации кадров: сырые признаки справа от оверлея (install.bat -FgDebug, Make-Overlay -FgDebug)
         $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'
-            Text = 'lib %FgLib% alt %GpuAlt% ratio %GpuAltRatio% gpu %GpuActive%  pres %FrameratePresented% disp %FramerateDisplayed% drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG% ~%IsFGApprox% native %NativeFPS%' }
+            Text = 'lib %FgLib% how %FgHow%  alt %GpuAlt%  r2 %GpuAltRatio% r3 %GpuAltRatio3% r4 %GpuAltRatio4%  x%FgN%   ' +
+                   'gpu %GpuActive%  pres %FrameratePresented% disp %FramerateDisplayed%  drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG%  native %NativeFPS%  pm %PresentMode%' }
         $dbg = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
         foreach ($k in $kv.Keys) { $dbg.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
         $allLayers += $dbg; $dbg.Name = "Layer$($allLayers.Count - 1)"

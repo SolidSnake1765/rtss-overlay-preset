@@ -7,12 +7,13 @@
 #   1. драйверная генерация (AMD AFMF, NVIDIA Smooth Motion): на экран выводится в 1.5+ раза больше кадров, чем
 #      отдала игра (PresentMon: FramerateDisplayed против FrameratePresented) — это измерение, реальный FPS точный;
 #   2. у игры есть библиотека генерации (DLSS-G, FSR, XeSS-FG) — датчик /overlay-preset/fg/data/0 из Exporter.dll;
-#   3. ритм кадров: каждый второй кадр гораздо легче для видеокарты. По буферу кадров PresentMon (buf(GpuActive,-1)
-#      — последний кадр): средний скачок времени GPU между соседними кадрами — больше 25 % от среднего времени, а
-#      через кадр значения почти совпадают (скачок между соседними в 2+ раза больше). Wukong, FSR 3: 0.6 и 5.9;
-#      без генерации: 0.04 — разница в 15 раз; второе условие отсекает беспорядочные скачки (статтеры).
-#   Генерацию внутри игры PresentMon не помечает, поэтому для неё нужны 2 и 3 вместе; реальный FPS — итоговый
-#   пополам (оценка, в строке «FG≈»). Признак должен держаться несколько секунд подряд.
+#   3. ритм кадров: настоящий кадр тяжёлый для видеокарты, сгенерированные — лёгкие. По буферу кадров PresentMon
+#      (buf(GpuActive,-1) — последний кадр): средний скачок времени GPU между соседними кадрами — больше 25 % от
+#      среднего времени, и ритм повторяется: при ×2 значения совпадают через 1 кадр, при ×3 (DLSS 4 MFG) — через 2,
+#      при ×4 — через 3 (скачок между соседними в 1.5+ раза больше, чем с кадром на период назад). Wukong, FSR 3:
+#      0.6 и 5.9; без генерации: 0.04 — разница в 15 раз; повтор отсекает беспорядочные скачки (статтеры).
+#   Генерацию внутри игры PresentMon не помечает, поэтому для неё нужны 2 и 3 вместе; реальный FPS — итоговый,
+#   делённый на кратность (оценка, в строке «FG≈»). Признак должен держаться несколько секунд подряд.
 
 $script:Steam = @{
     Fps = 'E8836B'; Cpu = 'E5C35C'; Gpu = '7DC75A'; Ram = 'B49DDB'; Fg = '6EC6FF'
@@ -53,16 +54,30 @@ function Get-CompactParts($Report) {
     Src 'GpuActive' 'PresentMon' 'msGpuActive' 'ms' '%.1f'
     Src 'GpuJump1' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-2)')
     Src 'GpuJump2' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-3)')
+    Src 'GpuJump3' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-4)')
+    Src 'GpuJump4' 'PresentMon' 'msGpuActive' 'ms' '%.1f' (& $abs 'buf(GpuActive,-1) - buf(GpuActive,-5)')
     Src 'GpuAlt' 'HAL' 'Stub' '' '%.2f' 'swavg(GpuJump1,64) / swavg(GpuActive,64)'
+    # повтор ритма через 1, 2 и 3 кадра: ×2 — тяжёлый/лёгкий, ×3 — тяжёлый и два лёгких, ×4 — тяжёлый и три лёгких
     Src 'GpuAltRatio' 'HAL' 'Stub' '' '%.1f' 'swavg(GpuJump1,64) / swavg(GpuJump2,64)'
+    Src 'GpuAltRatio3' 'HAL' 'Stub' '' '%.1f' 'swavg(GpuJump1,64) / swavg(GpuJump3,64)'
+    Src 'GpuAltRatio4' 'HAL' 'Stub' '' '%.1f' 'swavg(GpuJump1,64) / swavg(GpuJump4,64)'
+    # при ×2 повтор через 3 кадра тоже большой (как через 1), поэтому ×3 и ×4 — только когда ритма ×2 нет совсем
+    # (r2 < 1.25; при настоящих ×3 и ×4 r2 около 1), иначе мигающий ×2 (Witcher 3: r2 гуляет около 2) читался бы как ×4;
+    # для ×4 ещё r4 в 1.5+ раза больше r2 — при ×2 они почти равны (оба — повтор через чётное число кадров)
+    Src 'FgMul2' 'HAL' 'Stub' '' '' 'GpuAltRatio >= 1.5'
+    Src 'FgMul3' 'HAL' 'Stub' '' '' '(GpuAltRatio < 1.25) * (GpuAltRatio3 >= 1.5) * (GpuAltRatio4 < 1.25)'
+    Src 'FgMul4' 'HAL' 'Stub' '' '' '(GpuAltRatio < 1.25) * (GpuAltRatio3 < 1.25) * (GpuAltRatio4 >= 1.5) * (GpuAltRatio4 >= GpuAltRatio * 1.5)'
     Src 'FgLib' 'LHM' '/overlay-preset/fg/data/0'
+    Src 'FgHow' 'LHM' '/overlay-preset/fg/data/1'    # как найдена библиотека — только для строки -FgDebug
     Src 'DrvFG' 'HAL' 'Stub' '' '' '(FrameratePresented >= 10) ? (FramerateDisplayed >= FrameratePresented * 1.5) : 0'
-    Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * (GpuAltRatio >= 1.5)) : 0'
+    Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((GpuAlt >= 0.25) * ((FgMul2 + FgMul3 + FgMul4) > 0)) : 0'
     Src 'FgRaw' 'HAL' 'Stub' '' '' '(DrvFG + GameFG) > 0'
     # признак «мигает» (в Witcher 3 с модом GpuAltRatio гуляет около 2) — FG, если он был большую часть последних 5 с
     Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,10) >= 0.6'    # 10 обновлений оверлея по 500 мс = 5 с
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
-    Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
+    # кратность — по большинству последних 5 с, чтобы реальный FPS не прыгал между ÷2 и ÷4
+    Src 'FgN' 'HAL' 'Stub' '' '%.0f' '(swavg(FgMul4,10) >= 0.5) ? 4 : ((swavg(FgMul3,10) >= 0.5) ? 3 : 2)'
+    Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / FgN)'
     # Present Mode — как кадры игры попадают на экран (PresentMon, PM_PRESENT_MODE в SDK\Include\PresentMon\PresentMonAPI.h):
     # 3 — Hardware: Independent Flip (мимо рабочего стола Windows, минимальная задержка), 8 — то же через аппаратный
     # слой MPO, 1/2 — Hardware: Legacy Flip / Copy (эксклюзивный полный экран, тоже минимальная задержка),

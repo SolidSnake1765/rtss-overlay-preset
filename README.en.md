@@ -103,8 +103,10 @@ plus 45 generated. The overlay tells them apart in three ways:
    **PresentMon** (bundled with RTSS) sees this, so the real FPS is measured exactly.
 2. **In-game generation** (FSR, DLSS, XeSS) — PresentMon does not mark it, so two signs are needed at once: the game
    has a frame generation library (checked by the preset's `Exporter.dll`: an FG DLL or FSR 3 built into the game
-   itself) **and** the frame rhythm — every second frame is much lighter for the GPU. The real FPS is then the total
-   divided by two; it is an estimate, so it is marked **`FG≈`**.
+   itself; if an anti-cheat hides the game's module list, like BattlEye in GTA V, an FG DLL in the game folder)
+   **and** the frame rhythm — a real frame is heavy for the GPU, generated ones are light, and the pattern repeats:
+   every other frame at ×2, every 3rd and 4th frame with DLSS 4 multi frame generation (×3, ×4). The real FPS is then
+   the total divided by the detected multiplier; it is an estimate, so it is marked **`FG≈`**.
 3. The sign must hold for most of the last 5 seconds — short spikes do not switch it on.
 
 On screen:
@@ -157,6 +159,11 @@ A detailed write-up with pictures, MPO checks and fixes: ["Presentation Model in
 
 Run `installer\Detect.ps1 -Export` (PowerShell as administrator) and attach the generated
 `installer\hardware-report.json` to an [issue](../../issues).
+
+**Frame generation is on, but the overlay does not see it.** Reinstall the preset with `install.bat -FgDebug` — a line
+with the raw signs appears to the right of the overlay (`lib` — library found, `alt`, `r2`/`r3`/`r4` — frame rhythm,
+`x` — multiplier). Take a screenshot in the game with frame generation and attach it to an [issue](../../issues)
+with the game and GPU name. Running `install.bat` again brings back the normal view.
 
 **Frame generation is no longer detected, or "FG" flickers with a wrong FPS.** Frame data comes from Windows event
 tracing (via PresentMon). If Windows has not been restarted for a long time and frame monitoring tools were started

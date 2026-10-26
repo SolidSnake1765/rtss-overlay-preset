@@ -91,6 +91,7 @@ For **NVIDIA RTX 20 / 30 / 40 / 50** cards we recommend [NV-UV](https://github.c
   install. The PawnIO driver stays (other programs use it too); remove it in "Settings → Apps" if you want.
 
 Unattended: `install.bat -Lang en -Font Bahnschrift -Style Compact -Defaults`.
+`install.bat -FgDebug` adds a line with the raw frame generation signs to the right of the overlay (for a problem report).
 
 ## Manual
 

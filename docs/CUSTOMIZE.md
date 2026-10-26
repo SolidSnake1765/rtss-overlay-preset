@@ -138,13 +138,15 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | драйверная генерация (AFMF, Smooth Motion) |
 | `FgLib` | датчик `/overlay-preset/fg/data/0` | 1 — у игры есть библиотека генерации |
 | `GpuActive` | PresentMon `msGpuActive` | время работы видеокарты над кадром |
-| `GpuJump1`, `GpuJump2` | `buf(GpuActive,-1) - buf(GpuActive,-2)` и `…-3)` по модулю | скачок к соседнему кадру и через кадр |
+| `GpuJump1` … `GpuJump4` | `buf(GpuActive,-1) - buf(GpuActive,-2)` … `-5)` по модулю | скачок к соседнему кадру, через 1, 2 и 3 кадра |
 | `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | доля скачка от среднего времени |
-| `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | скачки именно через кадр, а не беспорядочно |
-| `GameFG` | `FgLib` и `GpuAlt >= 0.25` и `GpuAltRatio >= 1.5` | генерация внутри игры |
+| `GpuAltRatio`, `GpuAltRatio3`, `GpuAltRatio4` | `swavg(GpuJump1,64) / swavg(GpuJump2…4,64)` | рисунок повторяется через 1, 2, 3 кадра (r2, r3, r4) |
+| `FgMul2`, `FgMul3`, `FgMul4` | ×2: `r2 >= 1.5`; ×3: `r3 >= 1.5`, `r2` и `r4 < 1.25`; ×4: `r4 >= 1.5` и `>= r2 × 1.5`, `r2` и `r3 < 1.25` | кратность генерации |
+| `GameFG` | `FgLib` и `GpuAlt >= 0.25` и одна из `FgMul` | генерация внутри игры |
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — генерация была большую часть последних 5 с (10 обновлений по 500 мс) |
 | `IsFGApprox` | генерация не драйверная | показывать `≈` |
-| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | реальный FPS игры |
+| `FgN` | 4 / 3, если `FgMul4` / `FgMul3` были большую часть последних 5 с, иначе 2 | кратность для реального FPS |
+| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` | реальный FPS игры |
 
 Замеры на Black Myth: Wukong (FSR 3): `GpuAlt` с генерацией 0.43–0.6, без неё 0.04–0.07; `GpuAltRatio` 4–6
 и около 1; в Witcher 3 с модом RTX 30 FG `GpuAltRatio` гуляет около 2, поэтому порог 1.5. Пороги `0.25` и `1.5` — в формуле `GameFG`. `buf(Имя,-1)` — последний кадр в буфере PresentMon;
@@ -172,6 +174,7 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `/overlay-preset/fps/data/0` | FPS игры на переднем плане за последние полсекунды — по буферу кадров из общей памяти RTSS (тот же расчёт, что у самого RTSS); по нему строится плавный график FPS компактной строки |
 | `/overlay-preset/fps/data/1` | самый долгий кадр за последние полсекунды, мс — из буфера кадров RTSS (в оверлее сейчас не используется) |
 | `/overlay-preset/osd/data/0`, `data/1` | положение оверлея на экране — `PositionX`, `PositionY` из профиля RTSS (профиль игры, если в нём задано, иначе Global); отрицательное — от правого / нижнего края |
+| `/overlay-preset/fg/data/1` | как найдена библиотека (для строки `-FgDebug`): 1 — загруженный модуль, 2 — DLL в папке игры, 3 — FSR 3 внутри exe, 0 — не найдена; +10 — список модулей закрыт (античит) |
 | `/overlay-preset/fg/data/0` | 1 — у игры на переднем плане есть библиотека генерации кадров (DLSS-G, FSR, XeSS-FG или встроенный FSR 3); результат проверки exe кэшируется в `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Тайминги читаются напрямую из контроллера памяти: Intel Core 6–14 поколения, AMD Ryzen (Zen 2–5).

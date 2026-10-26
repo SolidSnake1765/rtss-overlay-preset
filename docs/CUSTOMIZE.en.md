@@ -142,13 +142,15 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | driver-level generation (AFMF, Smooth Motion) |
 | `FgLib` | sensor `/overlay-preset/fg/data/0` | 1 — the game has a frame generation library |
 | `GpuActive` | PresentMon `msGpuActive` | GPU time spent on a frame |
-| `GpuJump1`, `GpuJump2` | absolute `buf(GpuActive,-1) - buf(GpuActive,-2)` and `…-3)` | jump to the next frame and to the one after |
+| `GpuJump1` … `GpuJump4` | absolute `buf(GpuActive,-1) - buf(GpuActive,-2)` … `-5)` | jump to the next frame, 1, 2 and 3 frames further |
 | `GpuAlt` | `swavg(GpuJump1,64) / swavg(GpuActive,64)` | jump size relative to the average time |
-| `GpuAltRatio` | `swavg(GpuJump1,64) / swavg(GpuJump2,64)` | the jumps alternate every frame rather than at random |
-| `GameFG` | `FgLib` and `GpuAlt >= 0.25` and `GpuAltRatio >= 1.5` | in-game frame generation |
+| `GpuAltRatio`, `GpuAltRatio3`, `GpuAltRatio4` | `swavg(GpuJump1,64) / swavg(GpuJump2…4,64)` | the pattern repeats every 1, 2, 3 frames (r2, r3, r4) |
+| `FgMul2`, `FgMul3`, `FgMul4` | ×2: `r2 >= 1.5`; ×3: `r3 >= 1.5`, `r2` and `r4 < 1.25`; ×4: `r4 >= 1.5` and `>= r2 × 1.5`, `r2` and `r3 < 1.25` | frame generation multiplier |
+| `GameFG` | `FgLib` and `GpuAlt >= 0.25` and one of `FgMul` | in-game frame generation |
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — frame generation present for most of the last 5 s (10 updates of 500 ms) |
 | `IsFGApprox` | not driver-level | show `≈` |
-| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | the game's real FPS |
+| `FgN` | 4 / 3 if `FgMul4` / `FgMul3` held for most of the last 5 s, otherwise 2 | multiplier for the real FPS |
+| `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` | the game's real FPS |
 
 Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
 4–6 and about 1; in Witcher 3 with the RTX 30 FG mod `GpuAltRatio` hovers around 2, hence the 1.5 threshold. The `0.25` and `1.5` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
@@ -176,6 +178,7 @@ in your own layers:
 | `/overlay-preset/fps/data/0` | the foreground game's FPS over the last half second — from the frame buffer in RTSS shared memory (the same calculation as RTSS itself); drives the compact line's smooth FPS graph |
 | `/overlay-preset/fps/data/1` | the slowest frame of the last half second, ms — from RTSS's frame time buffer (not used by the overlay right now) |
 | `/overlay-preset/osd/data/0`, `data/1` | the overlay position on screen — `PositionX`, `PositionY` from the RTSS profile (the game's profile if it sets them, otherwise Global); negative means from the right / bottom edge |
+| `/overlay-preset/fg/data/1` | how the library was found (for the `-FgDebug` line): 1 loaded module, 2 DLL in the game folder, 3 FSR 3 inside the exe, 0 not found; +10 — module list closed (anti-cheat) |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show

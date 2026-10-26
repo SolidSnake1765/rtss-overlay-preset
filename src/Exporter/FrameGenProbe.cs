@@ -10,8 +10,13 @@
 // Intel XeSS-FG). FSR 3.0 is often linked statically into the game executable (e.g. Black Myth: Wukong), so if
 // no module is found, the executable file is scanned once for FSR 3 frame interpolation symbols; the result is
 // cached per path + size + timestamp in %ProgramData%\RTSS-Overlay-Preset\fg-cache.txt.
+// Anti-cheat protected games (e.g. GTA V Enhanced with BattlEye) do not let other processes list their modules;
+// then the executable's folder is checked for the same FG DLL files instead (the image path needs only
+// PROCESS_QUERY_LIMITED_INFORMATION, which anti-cheats normally allow).
 //
-// Exported sensor: /overlay-preset/fg/data/0 "Frame Generation Library" = 1 or 0.
+// Exported sensors: /overlay-preset/fg/data/0 "Frame Generation Library" = 1 or 0;
+// /overlay-preset/fg/data/1 "Probe" — how it was decided, for the -FgDebug line: 1 loaded module, 2 DLL file in the
+// game folder, 3 FSR 3 marker in the executable, 0 nothing found; +10 when the module list was not readable.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,6 +45,7 @@ namespace Exporter
 		static int s_pid;
 		static int s_calls;
 		static int s_result;
+		static int s_how;
 		static readonly Dictionary<string, int> s_cache = LoadCache();
 		static readonly HashSet<string> s_scanning = new HashSet<string>();
 		static readonly object s_lock = new object();
@@ -56,11 +62,14 @@ namespace Exporter
 
 			return "<hardware>\n<id>/overlay-preset/fg</id><name>Frame Generation</name><type>Cpu</type>\n" +
 				   "<sensor><id>/overlay-preset/fg/data/0</id><name>Frame Generation Library</name><type>Data</type><value>" +
-				   s_result + "</value></sensor>\n</hardware>\n";
+				   s_result + "</value></sensor>\n" +
+				   "<sensor><id>/overlay-preset/fg/data/1</id><name>Probe</name><type>Data</type><value>" +
+				   s_how + "</value></sensor>\n</hardware>\n";
 		}
 
 		static int Probe(int pid)
 		{
+			s_how = 0;
 			string exe = null;
 			bool modulesRead = false;
 			IntPtr snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, (uint)pid);
@@ -78,7 +87,10 @@ namespace Exporter
 						string name = me.szModule.ToLowerInvariant();
 						foreach (string m in s_modules)
 							if (name == m)
+							{
+								s_how = 1;
 								return 1;
+							}
 					}
 				}
 				finally
@@ -86,7 +98,20 @@ namespace Exporter
 					CloseHandle(snap);
 				}
 			}
-			if (!modulesRead || exe == null)
+			if (!modulesRead)
+			{
+				// module list is closed (anti-cheat) — look for FG DLL files next to the executable
+				s_how = 10;
+				exe = ImagePath(pid);
+				if (exe == null)
+					return 0;
+				if (HasFgFiles(Path.GetDirectoryName(exe)))
+				{
+					s_how = 12;
+					return 1;
+				}
+			}
+			if (exe == null)
 				return 0;
 
 			// no FG module loaded — look for statically linked FSR 3 in the executable (once per file version)
@@ -105,7 +130,11 @@ namespace Exporter
 			{
 				int cached;
 				if (s_cache.TryGetValue(key, out cached))
+				{
+					if (cached > 0)
+						s_how += 3;
 					return cached;
+				}
 				if (s_scanning.Add(key))
 					ThreadPool.QueueUserWorkItem(delegate { Scan(exe, key); });
 			}
@@ -204,6 +233,37 @@ namespace Exporter
 			}
 		}
 
+		static bool HasFgFiles(string dir)
+		{
+			try
+			{
+				foreach (string m in s_modules)
+					if (File.Exists(Path.Combine(dir, m)))
+						return true;
+			}
+			catch (Exception)
+			{
+			}
+			return false;
+		}
+
+		static string ImagePath(int pid)
+		{
+			IntPtr process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)pid);
+			if (process == IntPtr.Zero)
+				return null;
+			try
+			{
+				StringBuilder path = new StringBuilder(1024);
+				uint size = (uint)path.Capacity;
+				return QueryFullProcessImageNameW(process, 0, path, ref size) ? path.ToString() : null;
+			}
+			finally
+			{
+				CloseHandle(process);
+			}
+		}
+
 		static int ForegroundPid()
 		{
 			IntPtr wnd = GetForegroundWindow();
@@ -214,6 +274,7 @@ namespace Exporter
 			return (int)pid;
 		}
 
+		const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 		const uint TH32CS_SNAPMODULE	= 0x00000008;
 		const uint TH32CS_SNAPMODULE32	= 0x00000010;
 		static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
@@ -237,6 +298,8 @@ namespace Exporter
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32FirstW(IntPtr snap, ref MODULEENTRY32W me);
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool Module32NextW(IntPtr snap, ref MODULEENTRY32W me);
 		[DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+		[DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool QueryFullProcessImageNameW(IntPtr process, uint flags, StringBuilder path, ref uint size);
 		[DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
 		[DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr wnd, out uint pid);
 	}
