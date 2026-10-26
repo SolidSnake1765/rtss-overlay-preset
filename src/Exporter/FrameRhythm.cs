@@ -37,11 +37,27 @@ namespace Exporter
 		static double s_lastRhythm;
 
 		/// <summary>Multiplier of in-game frame generation now (the same signs as the overlay's GameFG), or 1.</summary>
+		/// <remarks>Called once per update (RtssFramerate). In menus, loading screens and while the game is in the background
+		/// the rhythm drowns in noise for a while; the last multiplier is kept for up to STICKY updates (10 s) meanwhile,
+		/// otherwise those generated frames would count as real ones and push the AVG up.</remarks>
 		public static int ActiveMultiplier()
 		{
 			int m = StableMultiplier();
-			return FrameGenProbe.HasLibrary && s_lastRhythm >= 0.25 && m >= 2 ? m : 1;
+			if (FrameGenProbe.HasLibrary && s_lastRhythm >= 0.25 && m >= 2)
+			{
+				s_lastActive = m;
+				s_lostUpdates = 0;
+				return m;
+			}
+			if (FrameGenProbe.HasLibrary && s_lastActive >= 2 && ++s_lostUpdates <= STICKY)
+				return s_lastActive;
+			s_lastActive = 0;
+			return 1;
 		}
+
+		const int STICKY = 20;
+		static int s_lastActive;
+		static int s_lostUpdates;
 
 		public static string ToXml()
 		{

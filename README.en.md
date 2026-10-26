@@ -120,10 +120,12 @@ On screen:
   three in a row are one real frame) and computes the same numbers by RTSS's rules; they reset together with RTSS
   statistics (Ctrl+Alt+Num 1). Without frame generation they match RTSS's own numbers (verified).
 
-Under frame generation the full style's FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
-millisecond: RTSS measures the time between presented frames, and a generated frame is presented right after the real
-one. On screen the frames are evenly paced. Redrawing the graphs from PresentMon data was tried — the data arrives in
-batches with a delay and the graphs stutter, so it stays this way for now.
+Under FSR frame generation (OptiScaler included) the full style's FPS and frametime graphs look like a "comb": RTSS
+measures the time between present calls, and such frame generation makes them in a burst (10, 1, 1 ms), while the frames
+reach the screen evenly (4, 4, 4 ms). So the frametime number on the right is computed from the total FPS under frame
+generation. DLSS FG on RTX 40/50 paces frames at present time already, and the RTSS graphs are flat there. Graphs from the
+display changes (PresentMon `msBetweenDisplayChange`) were tried: PresentMon delivers the data in batches every ~70 ms
+about 2.5 s late, and the graphs stutter even with a display delay, so the RTSS graphs stay.
 
 Tested on an RTX 3080 Ti: Black Myth: Wukong (built-in FSR 3) and The Witcher 3 with OptiScaler (DLSS frame generation
 → FSR 3.1) at ×2, ×3, ×4, ×5 and ×6 — the multiplier is detected correctly and the real FPS is the total divided by it;

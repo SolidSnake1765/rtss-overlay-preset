@@ -204,6 +204,9 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     # и просадки при любом FPS (раньше шкала 0..500 прижимала 60 FPS к самому низу).
     # Frametime: линия с автомасштабом — каждый фриз виден пиком на любой частоте кадров.
     # графики по кадрам, как у RTSS (пробовали точку раз в секунду — пики frametime превращались в ровные полки)
+    # при генерации FSR графики — «расчёска» (кадры выводятся пачкой); ровные графики по смене кадров на экране
+    # (PresentMon msBetweenDisplayChange) пробовали 26.10: PresentMon отдаёт данные пачками раз в ~70 мс с опозданием
+    # ~2.5 с, графики дёргаются даже с PM_DisplayDelay — пользователь выбрал прежние графики RTSS
     Set-Key (Layer 'fps.graph') 'Text' '<G=Framerate,0,0,-1,0,500,81>'
     Set-Key (Layer 'fps.graph') 'TextColor' "60$($script:Palette.Fps)"
     Set-Key (Layer 'ft.graph') 'Text' '<G=Frametime,0,0,-1,0,50,80>'
@@ -214,6 +217,8 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     # крупное число — реальный FPS игры, а итоговый с генерацией — в подписи над графиком: «Native Framerate  FG 120»;
     # «FG≈» — генерация внутри игры, реальный FPS оценён как итоговый пополам (≈ — значок из спрайта, Build-Compact.ps1)
     Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
+    Set-Key (Layer 'fps.cur') 'TextColor' ((Get-Key (Layer 'fps.cur') 'TextColor').Replace('(Framerate,', '(FrCurShown,'))
+    Set-Key (Layer 'fps.ft') 'Text' '<IF IsFG>%FtShown%<ELSE><FT><IF>'
     $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
     Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG><I=6,7,96,0,32,32>%FgShowN% %TotalFPS%<ELSE>Current Framerate<IF>'
     # AVG / 1% / 0.1% low: при генерации внутри игры — по настоящим кадрам (NatAvg и др., Build-Compact.ps1), иначе родные

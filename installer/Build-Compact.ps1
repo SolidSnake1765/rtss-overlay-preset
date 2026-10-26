@@ -75,6 +75,11 @@ function Get-CompactParts($Report) {
     Src 'RtssAvg' 'LHM' '/overlay-preset/fps/data/5' 'FPS' '%.0f'
     Src 'RtssLow1' 'LHM' '/overlay-preset/fps/data/6' 'FPS' '%.0f'
     Src 'RtssLow01' 'LHM' '/overlay-preset/fps/data/7' 'FPS' '%.0f'
+    # число frametime при генерации — по итоговому FPS (время между кадрами на экране; RTSS показывает последний
+    # промежуток между вызовами вывода, а генерация вызывает их пачкой: 10, 1, 1 мс); цвет крупного FPS — по показанному
+    # числу
+    Src 'FtShown' 'HAL' 'Stub' 'ms' '%.1f' '1000 / TotalFPS'
+    Src 'FrCurShown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFG) ? NativeFPS : TotalFPS'
     Src 'NatMax' 'LHM' '/overlay-preset/fps/data/8' 'FPS' '%.0f'
     Src 'FrAvgShown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFGApprox) ? NatAvg : RtssAvg'
     Src 'FrLow1Shown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFGApprox) ? NatLow1 : RtssLow1'
