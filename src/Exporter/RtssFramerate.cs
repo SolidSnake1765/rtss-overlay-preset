@@ -15,7 +15,8 @@
 //
 // Exported sensors: /overlay-preset/fps/data/0 "Framerate", /overlay-preset/fps/data/1 "Frametime max", ms;
 // /overlay-preset/fps/data/2..4 "Native AVG / 1% low / 0.1% low", /overlay-preset/fps/data/5..7 "RTSS AVG / 1% low /
-// 0.1% low", /overlay-preset/fps/data/8 "Native max", FPS.
+// 0.1% low", /overlay-preset/fps/data/8 "Native max", /overlay-preset/fps/data/9 "RTSS framerate" — RTSS's own
+// once-per-second framerate (the same as <FR>), FPS.
 using System;
 using System.Globalization;
 using System.Text;
@@ -56,6 +57,7 @@ namespace Exporter
 		static uint s_lastPos;
 		static uint s_lastStatTime0;
 		static double s_rtssAvg, s_rtssLow1, s_rtssLow01;
+		static double s_rtssFps;
 
 		public static string ToXml()
 		{
@@ -72,6 +74,8 @@ namespace Exporter
 			if (NativeStats.TryGet(PercentileMode(), out avg, out low1, out low01, out max))
 				xml += Sensor(2, "Native AVG", avg) + Sensor(3, "Native 1% low", low1) + Sensor(4, "Native 0.1% low", low01) +
 					   Sensor(8, "Native max", max);
+			if (s_rtssFps > 0)
+				xml += Sensor(9, "RTSS framerate", s_rtssFps);
 			if (s_rtssAvg > 0)
 				xml += Sensor(5, "RTSS AVG", s_rtssAvg) + Sensor(6, "RTSS 1% low", s_rtssLow1) + Sensor(7, "RTSS 0.1% low", s_rtssLow01);
 			return xml + "</hardware>\n";
@@ -126,6 +130,7 @@ namespace Exporter
 						return false;
 
 					fps = 1000.0 * frames / (time1 - time0);
+					s_rtssFps = fps;
 
 					// RTSS statistics; a new start time means they were reset (benchmark hotkey) — reset ours too
 					uint statTime0 = view.ReadUInt32(entry + APP_STAT_TIME0);
@@ -146,7 +151,7 @@ namespace Exporter
 						uint added = (pos + FT_BUF_SIZE - s_lastPos) % FT_BUF_SIZE;
 						uint max = 0;
 						ulong sum = 0;
-						int multiplier = FrameRhythm.ActiveMultiplier();
+						int multiplier = FrameRhythm.ActiveMultiplier();		// 0 — unknown yet, NativeStats skips
 						for (uint k = added; k-- > 0; )		// oldest first: NativeStats sums frames in order
 						{
 							uint ft = view.ReadUInt32(entry + APP_FT_BUF + 4 * ((pos + FT_BUF_SIZE - k) % FT_BUF_SIZE));

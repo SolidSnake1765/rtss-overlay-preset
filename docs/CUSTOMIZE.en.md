@@ -138,7 +138,7 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | Source | Formula | Meaning |
 |---|---|---|
 | `FrameratePresented`, `FramerateDisplayed` | PresentMon | frames per second from the game and on screen |
-| `TotalFPS` | the larger of the two | FPS with generation |
+| `TotalFPS` | RTSS's own FPS (`RtssFps`, sensor `/overlay-preset/fps/data/9`, same as `<FR>`); with driver-level generation the larger of the two PresentMon values (`PmFps`) | FPS with generation (under FSR frame generation via OptiScaler PresentMon counted ~6 % fewer frames than RTSS and Steam) |
 | `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | driver-level generation (AFMF, Smooth Motion) |
 | `FgLib` | sensor `/overlay-preset/fg/data/0` | 1 — the game has a frame generation library |
 | `FgRhythm` | sensor `/overlay-preset/fgr/data/0` | rhythm: average GPU-time jump to the next frame / average time |

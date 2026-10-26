@@ -42,6 +42,10 @@ namespace Exporter
 		/// otherwise those generated frames would count as real ones and push the AVG up.</remarks>
 		public static int ActiveMultiplier()
 		{
+			// a game with a frame generation library, but no PresentMon frames yet (the provider starts ~10 s after RTSS):
+			// the multiplier is unknown — 0, NativeStats skips these frames instead of counting generated ones as real
+			if (FrameGenProbe.HasLibrary && !s_haveData && s_lastActive < 2)
+				return 0;
 			int m = StableMultiplier();
 			if (FrameGenProbe.HasLibrary && s_lastRhythm >= 0.25 && m >= 2)
 			{
@@ -58,12 +62,14 @@ namespace Exporter
 		const int STICKY = 20;
 		static int s_lastActive;
 		static int s_lostUpdates;
+		static bool s_haveData;
 
 		public static string ToXml()
 		{
 			double rhythm;
 			int multiplier;
-			if (!TryRead(out rhythm, out multiplier))
+			s_haveData = TryRead(out rhythm, out multiplier);
+			if (!s_haveData)
 			{
 				rhythm = 0;
 				multiplier = 0;

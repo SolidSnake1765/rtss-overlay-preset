@@ -48,11 +48,16 @@ namespace Exporter
 			s_max = 0;
 		}
 
-		/// <summary>One frame time from RTSS, microseconds; multiplier — current frame generation multiplier (1 = none).</summary>
+		/// <summary>One frame time from RTSS, microseconds; multiplier — current frame generation multiplier (1 = none,
+		/// 0 = unknown yet: the frame is skipped).</summary>
 		public static void Add(uint frameTimeUs, int multiplier)
 		{
 			if (multiplier < 1)
-				multiplier = 1;
+			{
+				s_group = 0;
+				s_inGroup = 0;
+				return;
+			}
 			s_group += frameTimeUs;
 			if (++s_inGroup < multiplier)
 				return;

@@ -49,7 +49,6 @@ function Get-CompactParts($Report) {
     # генерация кадров (см. шапку файла); порог 10 FPS — на рабочем столе и в меню кадры единичные
     Src 'FrameratePresented' 'PresentMon' 'FrameratePresented' 'FPS'
     Src 'FramerateDisplayed' 'PresentMon' 'FramerateDisplayed' 'FPS'
-    Src 'TotalFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(FramerateDisplayed > FrameratePresented) ? FramerateDisplayed : FrameratePresented'
     # ритм и кратность генерации — из Exporter.dll (FrameRhythm.cs)
     Src 'FgRhythm' 'LHM' '/overlay-preset/fgr/data/0' '' '%.2f'
     Src 'FgMul' 'LHM' '/overlay-preset/fgr/data/1'
@@ -57,6 +56,12 @@ function Get-CompactParts($Report) {
     Src 'FgLib' 'LHM' '/overlay-preset/fg/data/0'
     Src 'FgHow' 'LHM' '/overlay-preset/fg/data/1'    # как найдена библиотека — только для строки -FgDebug
     Src 'DrvFG' 'HAL' 'Stub' '' '' '(FrameratePresented >= 10) ? (FramerateDisplayed >= FrameratePresented * 1.5) : 0'
+    # итоговый FPS: генерацию внутри игры RTSS видит сам (каждый вызов вывода кадра, как и Steam) — его собственный FPS
+    # раз в секунду (= <FR>); PresentMon при генерации FSR через OptiScaler насчитывал на ~6 % меньше (210 против 224).
+    # Драйверную генерацию RTSS не видит — тогда кадры на экране по PresentMon
+    Src 'RtssFps' 'LHM' '/overlay-preset/fps/data/9' 'FPS' '%.0f'
+    Src 'PmFps' 'HAL' 'Stub' 'FPS' '%.0f' '(FramerateDisplayed > FrameratePresented) ? FramerateDisplayed : FrameratePresented'
+    Src 'TotalFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG + (RtssFps <= 0)) ? PmFps : RtssFps'
     Src 'GameFG' 'HAL' 'Stub' '' '' '((FgLib > 0) * (TotalFPS >= 20)) ? ((FgRhythm >= 0.25) * (FgMul >= 2)) : 0'
     Src 'FgRaw' 'HAL' 'Stub' '' '' '(DrvFG + GameFG) > 0'
     # чтобы признак не мигал на коротких сценах (меню, загрузки) — FG, если он был большую часть последних 5 с

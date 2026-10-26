@@ -134,7 +134,7 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | Источник | Формула | Что это |
 |---|---|---|
 | `FrameratePresented`, `FramerateDisplayed` | PresentMon | кадров в секунду от игры и на экране |
-| `TotalFPS` | больший из двух | FPS с генерацией |
+| `TotalFPS` | FPS самого RTSS (`RtssFps`, датчик `/overlay-preset/fps/data/9`, как `<FR>`); при драйверной генерации — больший из двух PresentMon (`PmFps`) | FPS с генерацией (при генерации FSR через OptiScaler PresentMon насчитывал на ~6 % меньше RTSS и Steam) |
 | `DrvFG` | `FramerateDisplayed >= FrameratePresented * 1.5` | драйверная генерация (AFMF, Smooth Motion) |
 | `FgLib` | датчик `/overlay-preset/fg/data/0` | 1 — у игры есть библиотека генерации |
 | `FgRhythm` | датчик `/overlay-preset/fgr/data/0` | ритм: средний скачок времени GPU к соседнему кадру / среднее время |
