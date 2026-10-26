@@ -113,7 +113,12 @@ plus 45 generated. The overlay tells them apart in three ways:
 On screen:
 - **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
   `Native Framerate  FG≈×2 90` (the multiplier and the total FPS with generation);
-- **compact line** — `FPS 45 FG≈×2 90 ↓… ↑…`. With driver-level generation the multiplier is measured exactly and shown without `≈`: `FG×2`.
+- **compact line** — `FPS 45 FG≈×2 90 ↓… ↑…`. With driver-level generation the multiplier is measured exactly and shown without `≈`: `FG×2`;
+- **AVG / 1% / 0.1% low** and the compact line's `↓` / `↑` — from the game's real frames. RTSS counts generated frames
+  too: its AVG is the total FPS and its lows come from the gaps between real and generated frames, so they do not fit
+  together (e.g. AVG 224 and 1% low 80 at a real ~75). `Exporter.dll` sums RTSS frame times by the multiplier (at ×3
+  three in a row are one real frame) and computes the same numbers by RTSS's rules; they reset together with RTSS
+  statistics (Ctrl+Alt+Num 1). Without frame generation they match RTSS's own numbers (verified).
 
 Under frame generation the full style's FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
 millisecond: RTSS measures the time between presented frames, and a generated frame is presented right after the real

@@ -216,6 +216,15 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
     $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
     Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG><I=6,7,96,0,32,32>%FgShowN% %TotalFPS%<ELSE>Current Framerate<IF>'
+    # AVG / 1% / 0.1% low: при генерации внутри игры — по настоящим кадрам (NatAvg и др., Build-Compact.ps1), иначе родные
+    # RTSS; цвета-предупреждения — по показанным числам (Fr*Shown вместо встроенных Framerate Avg и т. п.)
+    foreach ($f in @(@('fps.avg', '<FRAVG>', 'NatAvg', 'Framerate Avg', 'FrAvgShown'),
+                     @('fps.low1', '<FR10L>', 'NatLow1', 'Framerate 1% Low', 'FrLow1Shown'),
+                     @('fps.low01', '<FR01L>', 'NatLow01', 'Framerate 0.1% Low', 'FrLow01Shown'))) {
+        $l = Layer $f[0]
+        Set-Key $l 'Text' "<IF IsFGApprox>%$($f[2])%<ELSE>$($f[1])<IF>"
+        Set-Key $l 'TextColor' ((Get-Key $l 'TextColor').Replace("($($f[3]),", "($($f[4]),"))
+    }
     # Present Mode (источники Pm* — Build-Compact.ps1) — после разрешения: зелёный — кадры идут мимо рабочего стола
     # (iFlip, iFlip MPO, Legacy Flip/Copy — эксклюзивный полный экран), жёлтый — через рабочий стол (Composed),
     # красный — копированием (Composed Copy).
@@ -340,7 +349,8 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
         # отладка генерации кадров: сырые признаки справа от оверлея (install.bat -FgDebug, Make-Overlay -FgDebug)
         $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'
             Text = 'lib %FgLib% how %FgHow%  rhythm %FgRhythm% mul %FgMul% x%FgN%   ' +
-                   'pres %FrameratePresented% disp %FramerateDisplayed%  drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG%  native %NativeFPS%  pm %PresentMode%' }
+                   'pres %FrameratePresented% disp %FramerateDisplayed%  drv %DrvFG% game %GameFG% raw %FgRaw% fg %IsFG%  native %NativeFPS%  pm %PresentMode%   ' +
+                   'nat %NatAvg%/%NatLow1%/%NatLow01% max %NatMax%  rtss %RtssAvg%/%RtssLow1%/%RtssLow01%' }
         $dbg = [pscustomobject]@{ Name = 'Layer?'; Keys = New-Object System.Collections.Generic.List[object] }
         foreach ($k in $kv.Keys) { $dbg.Keys.Add([pscustomobject]@{ K = $k; V = [string]$kv[$k] }) }
         $allLayers += $dbg; $dbg.Name = "Layer$($allLayers.Count - 1)"

@@ -192,6 +192,8 @@ in your own layers:
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
 | `/overlay-preset/fps/data/0` | the foreground game's FPS over the last half second — from the frame buffer in RTSS shared memory (the same calculation as RTSS itself); drives the compact line's smooth FPS graph |
 | `/overlay-preset/fps/data/1` | the slowest frame of the last half second, ms — from RTSS's frame time buffer (not used by the overlay right now) |
+| `/overlay-preset/fps/data/2`, `3`, `4`, `8` | AVG, 1% low, 0.1% low and max (best second) of the real frames: RTSS frame times summed by the frame generation multiplier (`NativeStats.cs`); RTSS's rules — lows in integral mode (the frame at which the sum of the slowest frames reaches 1% / 0.1% of the total time) or percentile per the RTSS `PercentileCalc` setting; reset together with RTSS statistics |
+| `/overlay-preset/fps/data/5`, `6`, `7` | RTSS's own AVG, 1% low, 0.1% low (for the warning colours when there is no frame generation) |
 | `/overlay-preset/osd/data/0`, `data/1` | the overlay position on screen — `PositionX`, `PositionY` from the RTSS profile (the game's profile if it sets them, otherwise Global); negative means from the right / bottom edge |
 | `/overlay-preset/fg/data/1` | how the library was found (for the `-FgDebug` line): 1 loaded module, 2 DLL in the game folder, 3 FSR 3 inside the exe, 0 not found; +10 — module list closed (anti-cheat) |
 | `/overlay-preset/fgr/data/0`, `1`, `2` | frame generation rhythm, multiplier (2…8, 0 — none) and the multiplier over 5 s — from PresentMon frames in shared memory |

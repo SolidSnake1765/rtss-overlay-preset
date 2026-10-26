@@ -45,6 +45,9 @@ namespace Exporter
 		static int s_pid;
 		static int s_calls;
 		static int s_result;
+
+		/// <summary>The foreground game has a frame generation library (result of the last probe).</summary>
+		public static bool HasLibrary { get { return s_result > 0; } }
 		static int s_how;
 		static readonly Dictionary<string, int> s_cache = LoadCache();
 		static readonly HashSet<string> s_scanning = new HashSet<string>();

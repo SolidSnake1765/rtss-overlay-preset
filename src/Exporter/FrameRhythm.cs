@@ -34,6 +34,14 @@ namespace Exporter
 
 		static readonly int[] s_history = new int[HISTORY];
 		static int s_historyPos;
+		static double s_lastRhythm;
+
+		/// <summary>Multiplier of in-game frame generation now (the same signs as the overlay's GameFG), or 1.</summary>
+		public static int ActiveMultiplier()
+		{
+			int m = StableMultiplier();
+			return FrameGenProbe.HasLibrary && s_lastRhythm >= 0.25 && m >= 2 ? m : 1;
+		}
 
 		public static string ToXml()
 		{
@@ -44,6 +52,7 @@ namespace Exporter
 				rhythm = 0;
 				multiplier = 0;
 			}
+			s_lastRhythm = rhythm;
 			s_history[s_historyPos] = multiplier;
 			s_historyPos = (s_historyPos + 1) % HISTORY;
 

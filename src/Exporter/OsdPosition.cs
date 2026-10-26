@@ -40,6 +40,19 @@ namespace Exporter
 				   Sensor(0, "Position X", x) + Sensor(1, "Position Y", y) + "</hardware>\n";
 		}
 
+		/// <summary>An integer from the RTSS global profile (Profiles\Global).</summary>
+		public static int ReadGlobal(string section, string key, int def)
+		{
+			try
+			{
+				return (int)GetPrivateProfileInt(section, key, def, Path.Combine(s_profiles, "Global"));
+			}
+			catch (Exception)
+			{
+				return def;
+			}
+		}
+
 		static int Read(string app, string global, string key)
 		{
 			int v = MISSING;

@@ -65,6 +65,20 @@ function Get-CompactParts($Report) {
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / ((FgN >= 2) ? FgN : 2))'
     # кратность для надписи «FG≈×4»: драйверная — измерена (кадров на экране / кадров игры), внутри игры — по ритму
     Src 'FgShowN' 'HAL' 'Stub' '' '%.0f' '(DrvFG) ? round(FramerateDisplayed / FrameratePresented) : ((FgN >= 2) ? FgN : 2)'
+    # AVG / 1% / 0.1% low по настоящим кадрам (Exporter.dll, NativeStats.cs: кадры RTSS, сложенные по кратности) и родные
+    # числа RTSS. При генерации внутри игры большой вид показывает первые — у RTSS они смешаны со сгенерированными кадрами;
+    # драйверную генерацию RTSS не видит, его числа и так по кадрам игры. Цвет-предупреждение — по тем же числам, что
+    # на экране (Fr*Shown)
+    Src 'NatAvg' 'LHM' '/overlay-preset/fps/data/2' 'FPS' '%.0f'
+    Src 'NatLow1' 'LHM' '/overlay-preset/fps/data/3' 'FPS' '%.0f'
+    Src 'NatLow01' 'LHM' '/overlay-preset/fps/data/4' 'FPS' '%.0f'
+    Src 'RtssAvg' 'LHM' '/overlay-preset/fps/data/5' 'FPS' '%.0f'
+    Src 'RtssLow1' 'LHM' '/overlay-preset/fps/data/6' 'FPS' '%.0f'
+    Src 'RtssLow01' 'LHM' '/overlay-preset/fps/data/7' 'FPS' '%.0f'
+    Src 'NatMax' 'LHM' '/overlay-preset/fps/data/8' 'FPS' '%.0f'
+    Src 'FrAvgShown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFGApprox) ? NatAvg : RtssAvg'
+    Src 'FrLow1Shown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFGApprox) ? NatLow1 : RtssLow1'
+    Src 'FrLow01Shown' 'HAL' 'Stub' 'FPS' '%.0f' '(IsFGApprox) ? NatLow01 : RtssLow01'
     # Present Mode — как кадры игры попадают на экран (PresentMon, PM_PRESENT_MODE в SDK\Include\PresentMon\PresentMonAPI.h):
     # 3 — Hardware: Independent Flip (мимо рабочего стола Windows, минимальная задержка), 8 — то же через аппаратный
     # слой MPO, 1/2 — Hardware: Legacy Flip / Copy (эксклюзивный полный экран, тоже минимальная задержка),
@@ -130,7 +144,7 @@ function Get-CompactParts($Report) {
     # FPS: «FPS 225 ↓28 ↑419», при генерации кадров «FPS 60 FG 120 ↓95 ↑130»
     # <IF> не вкладываются: каждый следующий <IF> закрывает предыдущий, поэтому «≈» — отдельным блоком
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG><I=6,7,96,0,32,32>%FgShowN% <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
-               " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
+               " <C=$($P.Low)>$down<C=$($P.Value)><IF IsFGApprox>%NatLow1%<ELSE><FR10L><IF> <C=$($P.High)>$up<C=$($P.Value)><IF IsFGApprox>%NatMax%<ELSE><FRMAX><IF>")
     # график FPS: линия с автомасштабом на тёмной подложке
     # график FPS: точка на каждое обновление оверлея, 500 мс (FpsSec), 40 единиц ≈ последние 40 с — плавно, как у Steam; встроенный
     # <G=Framerate> добавлял точку на каждый кадр и при 150 FPS показывал полсекунды
