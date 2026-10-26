@@ -153,7 +153,9 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` | the game's real FPS |
 
 Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
-4–6 and about 1; in Witcher 3 with the RTX 30 FG mod `GpuAltRatio` hovers around 2, hence the 1.5 threshold. The `0.25` and `1.5` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
+4–6 and about 1; in Witcher 3 with the RTX 30 FG mod `GpuAltRatio` hovers around 2, hence the 1.5 threshold. Witcher 3 +
+OptiScaler (FSR 3.1 FG, ×2, 26.10): in game `GpuAlt` is 1.6–2.1 with frame generation and 0.0–0.1 without it; in the menu the
+values jump around and the sign does not hold — that is expected. The `0.25` and `1.5` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
 PresentMon buffer; `buf(x,…)` does not work inside PresentMon source formulas — only by source name.
 
 In layer text: `<IF IsFG>…<ELSE>…<IF>`; `<IF>` blocks do not nest (each one closes the previous), so `≈` is printed by
