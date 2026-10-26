@@ -120,8 +120,6 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `IsFG` | `swavg(FgRaw,3) > 0.9` | 1 — генерация держится 3 с подряд |
 | `IsFGApprox` | генерация не драйверная | показывать `~` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | реальный FPS игры |
-| `PresentGap` | PresentMon `msBetweenPresents` | интервал между выводами кадров |
-| `NativeFT`, `NativeFR` | `buf(PresentGap,-1) + buf(PresentGap,-2)` (при `DrvFG` — один интервал) и 1000 / это | время и частота настоящих кадров — для графиков и числа frametime при генерации |
 
 Замеры на Black Myth: Wukong (FSR 3): `GpuAlt` с генерацией 0.43–0.6, без неё 0.04–0.07; `GpuAltRatio` 4–6
 и около 1. Пороги `0.25` и `2` — в формуле `GameFG`. `buf(Имя,-1)` — последний кадр в буфере PresentMon;

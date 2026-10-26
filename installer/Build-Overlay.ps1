@@ -203,11 +203,9 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     # флаги RTSS: 1 — заливка, 0x80 — автомасштаб. FPS: залитая область с автомасштабом — видно и уровень,
     # и просадки при любом FPS (раньше шкала 0..500 прижимала 60 FPS к самому низу).
     # Frametime: линия с автомасштабом — каждый фриз виден пиком на любой частоте кадров.
-    # при генерации кадров — ритм настоящих кадров игры (NativeFR/NativeFT, см. Build-Compact.ps1), а не выводов
-    Set-Key (Layer 'fps.graph') 'Text' '<IF IsFG><G=NativeFR,0,0,-1,0,500,81><ELSE><G=Framerate,0,0,-1,0,500,81><IF>'
+    Set-Key (Layer 'fps.graph') 'Text' '<G=Framerate,0,0,-1,0,500,81>'
     Set-Key (Layer 'fps.graph') 'TextColor' "60$($script:Palette.Fps)"
-    Set-Key (Layer 'ft.graph') 'Text' '<IF IsFG><G=NativeFT,0,0,-1,0,50,80><ELSE><G=Frametime,0,0,-1,0,50,80><IF>'
-    Set-Key (Layer 'fps.ft') 'Text' '<IF IsFG>%NativeFT%<ELSE><FT><IF>'
+    Set-Key (Layer 'ft.graph') 'Text' '<G=Frametime,0,0,-1,0,50,80>'
     Set-Key (Layer 'ft.graph') 'TextColor' 'FFFFFF'
 
     # --- генерация кадров -------------------------------------------------------------------------

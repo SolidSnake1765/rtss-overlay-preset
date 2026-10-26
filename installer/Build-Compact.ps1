@@ -61,13 +61,6 @@ function Get-CompactParts($Report) {
     Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,3) > 0.9'
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
-    # графики при генерации: RTSS меряет время между выводами кадров, а сгенерированный кадр выводится почти сразу
-    # за настоящим (0.4 мс, потом 11.5 мс) — графики превращаются в «расчёску». Время кадра игры — сумма двух соседних
-    # интервалов (при драйверной генерации игра и так выводит только свои кадры). Считается на каждом кадре.
-    Src 'PresentGap' 'PresentMon' 'msBetweenPresents' 'ms' '%.1f'
-    $pair = '((DrvFG) ? buf(PresentGap,-1) : (buf(PresentGap,-1) + buf(PresentGap,-2)))'
-    Src 'NativeFT' 'PresentMon' 'msBetweenPresents' 'ms' '%.1f' $pair
-    Src 'NativeFR' 'PresentMon' 'msBetweenPresents' 'FPS' '%.0f' "1000 / $pair"
 
     Src 'CPU usage' 'HAL' 'CPU usage' '%'
     Src 'CPU usage max' 'HAL' 'CPU usage max' '%'
@@ -110,7 +103,7 @@ function Get-CompactParts($Report) {
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox>~<IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
-    $parts.Add("<C=$($P.Graph)><IF IsFG><G=NativeFR,40,0,1,0,0,90><ELSE><G=Framerate,40,0,1,0,0,90><IF><C=$($P.Value)>")
+    $parts.Add("<C=$($P.Graph)><G=Framerate,40,0,1,0,0,90><C=$($P.Value)>")
     # CPU: «CPU 36%/↑91% ▮▮▮ 52°C 5.03/↑5.42 GHz»
     $cpuText = "<C=$($P.Cpu)>CPU <C=$($P.Value)>%CPU usage%$(& $u '%')/<C=$($P.High)>$up<C=$($P.Value)>%CPU usage max%$(& $u '%')"
     if ($threads.Count) { $cpuText += " <C=$($P.Graph)>" + (($threads | ForEach-Object { "<G=Thread $_,1,0,0,0,100,38>" }) -join '') + "<C=$($P.Value)>" }

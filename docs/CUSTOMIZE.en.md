@@ -121,8 +121,6 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `IsFG` | `swavg(FgRaw,3) > 0.9` | 1 — frame generation held for 3 s |
 | `IsFGApprox` | not driver-level | show `~` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / 2` | the game's real FPS |
-| `PresentGap` | PresentMon `msBetweenPresents` | interval between presented frames |
-| `NativeFT`, `NativeFR` | `buf(PresentGap,-1) + buf(PresentGap,-2)` (one interval under `DrvFG`) and 1000 / that | real frame time and rate — for the graphs and the frametime number under frame generation |
 
 Measured in Black Myth: Wukong (FSR 3): `GpuAlt` 0.43–0.6 with frame generation, 0.04–0.07 without; `GpuAltRatio`
 4–6 and about 1. The `0.25` and `2` thresholds are in the `GameFG` formula. `buf(Name,-1)` is the last frame in the
