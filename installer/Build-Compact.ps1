@@ -104,10 +104,10 @@ function Get-CompactParts($Report) {
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox>~<IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
-    $parts.Add("<C=$($P.Graph)><G=Framerate,40,0,1,0,0,90><C=$($P.Value)>")
+    $parts.Add("<C=$($P.Graph)><G=Framerate,40,9,1,0,0,90><C=$($P.Value)>")
     # CPU: «CPU 36%/↑91% ▮▮▮ 52°C 5.03/↑5.42 GHz»
     $cpuText = "<C=$($P.Cpu)>CPU <C=$($P.Value)>%CPU usage%$(& $u '%')/<C=$($P.High)>$up<C=$($P.Value)>%CPU usage max%$(& $u '%')"
-    if ($threads.Count) { $cpuText += " <C=$($P.Graph)>" + (($threads | ForEach-Object { "<G=Thread $_,1,0,0,0,100,38>" }) -join '') + "<C=$($P.Value)>" }
+    if ($threads.Count) { $cpuText += " <C=$($P.Graph)>" + (($threads | ForEach-Object { "<G=Thread $_,1,9,0,0,100,38>" }) -join '') + "<C=$($P.Value)>" }
     if ($ids.'cpu.temp') { $cpuText += " %CPU temperature%$(& $u '°C')" } else { $log.Add('компактный: нет температуры CPU') }
     if ($clocks.Count) { $cpuText += " %CPU clock avg%/<C=$($P.High)>$up<C=$($P.Value)>%CPU clock max%$(& $u 'GHz')" }
     $parts.Add($cpuText)
@@ -119,7 +119,10 @@ function Get-CompactParts($Report) {
     # RAM: «RAM 21.6/31.9 GB»
     $parts.Add("<C=$($P.Ram)>RAM <C=$($P.Value)>%RamUsed%$(if (Test-SourceName $sources 'RamTotal') { '/%RamTotal%' })$(& $u 'GB')")
 
-    Lay ($parts -join '  ') @{ BgndColor = 'A0101010'; MarginLeft = 3; MarginTop = 1; MarginRight = 3; MarginBottom = 1 }
+    # подложка: по ширине RTSS считает её по тексту, не учитывая мелкие единицы <S=48> — последнее «GB» вылезало
+    # справа, поэтому в конце невидимая вставка — прозрачный угол спрайта стрелок (пробелы RTSS обрезает, у <C> альфа не работает); высота — явно, 11 единиц, текст по центру (ExtentOrigin 3): авто-высота
+    # срезала низ текста, а отступы (Margin*) только сдвигают текст, не увеличивая подложку
+    Lay (($parts -join '  ') + '<I=8,7,0,0,2,2>') @{ ExtentY = 11; ExtentOrigin = 3; BgndColor = 'A0101010'; MarginLeft = 3 }
 
     foreach ($x in ($sources.ToArray() + $layers.ToArray())) { foreach ($p in $x.Keys) { $p.V = ConvertTo-OvlText $p.V } }    # «°» — в cp1251
     $log.Add("компактный вид: источников $($sources.Count)")
