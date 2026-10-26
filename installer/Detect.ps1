@@ -9,23 +9,45 @@ $script:Root = Split-Path -Parent $PSScriptRoot
 
 #region RTSS / PawnIO -----------------------------------------------------------------------------
 
-function Find-Rtss {
-    $keys = 'HKLM:\SOFTWARE\WOW6432Node\Unwinder\RTSS', 'HKLM:\SOFTWARE\Unwinder\RTSS'
-    foreach ($k in $keys) {
-        $p = Get-ItemProperty $k -ErrorAction SilentlyContinue
-        if ($p -and $p.InstallDir -and (Test-Path (Join-Path $p.InstallDir 'RTSS.exe'))) {
-            return [pscustomobject]@{ Dir = $p.InstallDir; Version = [string]$p.ProductVersion }
+# Папка RTSS: заданная вручную (-Dir, путь к папке или к RTSS.exe), реестр установщика RTSS, запись «Программы
+# и компоненты», запущенный RTSS, автозапуск (задача планировщика RTSS, ключи Run), стандартные папки.
+# RTSS, скопированный в свою папку без установщика, в реестре не числится — его находит запущенный процесс
+# или автозапуск, иначе установщик спросит папку.
+function Find-Rtss([string]$Dir = '') {
+    function Probe([string]$Path, [string]$Version = '') {
+        if (-not $Path) { return $null }
+        $Path = $Path.Trim().Trim('"')
+        if ($Path -like '*.exe') { $Path = Split-Path -Parent $Path }
+        $exe = Join-Path $Path 'RTSS.exe'
+        if (-not (Test-Path -LiteralPath $exe)) { return $null }
+        # версия — только из реестра установщика RTSS: в самом RTSS.exe 7.3.7 записано «7.3.5.28314»
+        return [pscustomobject]@{ Dir = (Resolve-Path -LiteralPath $Path).ProviderPath; Version = [string]$Version }
+    }
+    if ($Dir) { return (Probe $Dir) }
+
+    foreach ($k in 'HKLM:\SOFTWARE\WOW6432Node\Unwinder\RTSS', 'HKLM:\SOFTWARE\Unwinder\RTSS', 'HKCU:\SOFTWARE\Unwinder\RTSS') {
+        $v = Get-ItemProperty $k -ErrorAction SilentlyContinue
+        if ($v) { $r = Probe $v.InstallDir $v.ProductVersion; if ($r) { return $r } }
+    }
+    foreach ($root in 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+                      'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall') {
+        foreach ($u in (Get-ChildItem $root -ErrorAction SilentlyContinue | ForEach-Object { Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue } |
+                        Where-Object { $_.PSChildName -eq 'RTSS' -or $_.DisplayName -like 'RivaTuner Statistics Server*' })) {
+            $r = Probe $u.InstallLocation $u.DisplayVersion; if ($r) { return $r }
+            if ($u.UninstallString) { $r = Probe (Split-Path -Parent ($u.UninstallString.Trim('"'))) $u.DisplayVersion; if ($r) { return $r } }
         }
     }
-    $u = Get-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\RTSS' -ErrorAction SilentlyContinue
-    if ($u -and $u.UninstallString) {
-        $dir = Split-Path -Parent ($u.UninstallString.Trim('"'))
-        if (Test-Path (Join-Path $dir 'RTSS.exe')) { return [pscustomobject]@{ Dir = $dir; Version = [string]$u.DisplayVersion } }
+    $p = Get-Process RTSS -ErrorAction SilentlyContinue | Where-Object Path | Select-Object -First 1
+    if ($p) { $r = Probe $p.Path; if ($r) { return $r } }
+    $task = Get-ScheduledTask -TaskName 'RTSS' -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($task) { foreach ($a in $task.Actions) { $r = Probe ([Environment]::ExpandEnvironmentVariables([string]$a.Execute)); if ($r) { return $r } } }
+    foreach ($k in 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run',
+                   'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run') {
+        $v = Get-ItemProperty $k -ErrorAction SilentlyContinue
+        if ($v) { foreach ($prop in $v.PSObject.Properties) { if ([string]$prop.Value -match '"?([^"]*\RTSS\.exe)"?') { $r = Probe $Matches[1]; if ($r) { return $r } } } }
     }
-    foreach ($dir in "${env:ProgramFiles(x86)}\RivaTuner Statistics Server", "$env:ProgramFiles\RivaTuner Statistics Server") {
-        if (Test-Path (Join-Path $dir 'RTSS.exe')) {
-            return [pscustomobject]@{ Dir = $dir; Version = (Get-Item (Join-Path $dir 'RTSS.exe')).VersionInfo.ProductVersion }
-        }
+    foreach ($d in "${env:ProgramFiles(x86)}\RivaTuner Statistics Server", "$env:ProgramFiles\RivaTuner Statistics Server") {
+        $r = Probe $d; if ($r) { return $r }
     }
     return $null
 }

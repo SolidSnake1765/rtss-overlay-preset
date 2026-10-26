@@ -2,14 +2,16 @@
 # Запуск: install.bat (сам попросит права администратора).
 # Параметры: -Lang ru|en, -Font Bahnschrift|Unispace, -Style Full|Compact (какой оверлей основной; без них — вопросы),
 #            -Defaults (горячие клавиши без вопросов), -NoRestart,
-#            -FgDebug (справа от оверлея — строка с сырыми признаками генерации кадров, для отчёта о проблеме)
+#            -FgDebug (справа от оверлея — строка с сырыми признаками генерации кадров, для отчёта о проблеме),
+#            -RtssDir <папка RTSS> (если RTSS стоит не там, где его можно найти, — например, скопирован без установщика)
 param(
     [ValidateSet('', 'ru', 'en')][string]$Lang = '',
     [ValidateSet('', 'Bahnschrift', 'Unispace')][string]$Font = '',
     [ValidateSet('', 'Full', 'Compact')][string]$Style = '',
     [switch]$Defaults,
     [switch]$NoRestart,
-    [switch]$FgDebug
+    [switch]$FgDebug,
+    [string]$RtssDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,15 +46,35 @@ try {
     Get-ChildItem $Root -Recurse -File | Unblock-File
 
     # 1. RTSS ----------------------------------------------------------------------------------------
-    $rtss = Find-Rtss
-    if (-not $rtss) { Fail (T 'RivaTuner Statistics Server не найден. Установите RTSS 7.3.7 или новее (guru3d.com) и запустите установщик снова.' 'RivaTuner Statistics Server not found. Install RTSS 7.3.7 or newer (guru3d.com) and run the installer again.') }
-    $ver = [version](($rtss.Version -replace '[^\d.]', '').Trim('.'))
+    $rtss = Find-Rtss $RtssDir
+    if (-not $rtss -and -not $RtssDir) {
+        # не нашли — спрашиваем папку (окно выбора, без рабочего стола — текстом)
+        Say ''
+        Say (T 'RTSS не найден автоматически. Укажите папку, где лежит RTSS.exe (или запустите RTSS и установщик снова).' 'RTSS was not found automatically. Choose the folder with RTSS.exe (or start RTSS and run the installer again).') -Color Yellow
+        $picked = $null
+        try {
+            Add-Type -AssemblyName System.Windows.Forms
+            $dlg = New-Object Windows.Forms.FolderBrowserDialog
+            $dlg.Description = T 'Папка RivaTuner Statistics Server (в ней лежит RTSS.exe)' 'RivaTuner Statistics Server folder (the one with RTSS.exe)'
+            $dlg.ShowNewFolderButton = $false
+            $owner = New-Object Windows.Forms.Form -Property @{ TopMost = $true }
+            if ($dlg.ShowDialog($owner) -eq 'OK') { $picked = $dlg.SelectedPath }
+            $owner.Dispose()
+        } catch { $picked = Read-Host (T '  Путь к папке RTSS' '  Path to the RTSS folder') }
+        if ($picked) { $rtss = Find-Rtss $picked }
+    }
+    if (-not $rtss) { Fail (T 'RivaTuner Statistics Server не найден. Установите RTSS 7.3.7 или новее (guru3d.com) или укажите его папку: install.bat -RtssDir "D:\Games\RTSS".' 'RivaTuner Statistics Server not found. Install RTSS 7.3.7 or newer (guru3d.com) or give its folder: install.bat -RtssDir "D:\Games\RTSS".') }
+    # главное требование — LHMDataProvider (появился в RTSS 7.3.7); номер версии сверяем, только если он из реестра
+    # (RTSS найден по процессу или автозапуску — номера нет, а в самом RTSS.exe 7.3.7 записано «7.3.5»)
     $lhmDir = Join-Path $rtss.Dir 'Plugins\Client\LHMDataProvider'
-    if ($ver -lt $MinRtss -or -not (Test-Path (Join-Path $lhmDir 'LHMDataProvider.exe'))) {
-        Fail (T "Нужен RTSS $MinRtss или новее (найден $($rtss.Version)). Обновите RTSS и запустите установщик снова." "RTSS $MinRtss or newer is required (found $($rtss.Version)). Update RTSS and run the installer again.")
+    $verText = ($rtss.Version -replace '[^\d.]', '').Trim('.')
+    $tooOld = $verText -and ([version]$verText -lt $MinRtss)
+    if ($tooOld -or -not (Test-Path (Join-Path $lhmDir 'LHMDataProvider.exe'))) {
+        $found = if ($rtss.Version) { $rtss.Version } else { T 'без LHMDataProvider' 'no LHMDataProvider' }
+        Fail (T "Нужен RTSS $MinRtss или новее (найден $found, $($rtss.Dir)). Обновите RTSS и запустите установщик снова." "RTSS $MinRtss or newer is required (found $found, $($rtss.Dir)). Update RTSS and run the installer again.")
     }
     Say ''
-    Say "RTSS $($rtss.Version): $($rtss.Dir)"
+    Say ("RTSS $($rtss.Version): $($rtss.Dir)" -replace '^RTSS : ', 'RTSS: ')
 
     # 2. Вопросы: шрифт, основной вид и горячие клавиши (всё интерактивное — в начале) ----------------
     if (-not $Font) {

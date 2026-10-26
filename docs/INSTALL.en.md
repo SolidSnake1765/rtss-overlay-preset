@@ -22,7 +22,7 @@ MSI Afterburner, HWiNFO and AIDA64 are not needed.
 
 | Step | What happens |
 |---|---|
-| Find RTSS | via the registry; version ≥ 7.3.7 is checked |
+| Find RTSS | registry, running RTSS, its autostart, standard folders; not found — a folder picker; RTSS 7.3.7+ is required (has `LHMDataProvider`) |
 | Backup | `%ProgramData%\RTSS-Overlay-Preset\backup\<date>` — everything that will be changed |
 | PawnIO driver | installed silently if missing (needed for motherboard, CPU and memory timing sensors) |
 | Files | into `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, PawnIO modules |
@@ -91,6 +91,8 @@ For **NVIDIA RTX 20 / 30 / 40 / 50** cards we recommend [NV-UV](https://github.c
   install. The PawnIO driver stays (other programs use it too); remove it in "Settings → Apps" if you want.
 
 Unattended: `install.bat -Lang en -Font Bahnschrift -Style Compact -Defaults`.
+`install.bat -RtssDir "D:\Games\RTSS"` — the RTSS folder, if the installer cannot find it (RTSS copied without its
+installer and not running; without the parameter the installer opens a folder picker itself).
 `install-debug.bat` (or `install.bat -FgDebug`) — the same install plus three debug lines to the right of the overlay:
 frame generation signs, RTSS and PresentMon frame rates, statistics. For a problem report — see the README, "Something is wrong".
 

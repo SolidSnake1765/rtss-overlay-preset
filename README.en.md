@@ -166,6 +166,11 @@ A detailed write-up with pictures, MPO checks and fixes: ["Presentation Model in
 
 ## Something is wrong
 
+**"RivaTuner Statistics Server not found".** The installer looks for RTSS in the registry, among running processes
+and in its autostart. If RTSS was copied to its own folder without the installer and is not running now, start RTSS and
+run the installer again, or pick the folder with `RTSS.exe` in the window the installer opens (unattended:
+`install.bat -RtssDir "D:\Games\RTSS"`).
+
 **Debug version — for a problem report.** If frame generation is not detected, the FPS does not match other overlays
 or something else looks wrong, install the preset with **`install-debug.bat`** instead of `install.bat`. It is the same
 installer, but three lines with raw data appear to the right of the overlay:
