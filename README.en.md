@@ -33,9 +33,9 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 - **Two styles:** full and a compact Steam-style line. Both are installed at once; one key (Scroll Lock) cycles between them right in game.
 - **Native FPS under frame generation** (both styles): like Steam, it shows the game's real frame rate and the total
   with DLSS FG / FSR FG / AFMF / Smooth Motion — see [below](#frame-generation).
-- **Present Mode** — how the game's frames reach the screen: green `iFlip` / `iFlip MPO` — directly, bypassing the
-  Windows desktop (lowest latency, G-Sync / FreeSync work properly), yellow `Composed` — through the desktop,
-  red `Composed Copy` — by copying, grey `Legacy` — old modes. Shown in the full style after the resolution.
+- **Present Mode** — how the game's frames reach the screen: green — directly, with the lowest latency; yellow and
+  red — through the Windows desktop, with an extra frame of latency. Shown in the full style after the resolution —
+  see [below](#present-mode).
 - Installer and documentation in Russian and English.
 
 ## Install
@@ -124,6 +124,26 @@ differently — it hooks the DLSS and FSR 3.1+ library calls inside the game; FS
 is invisible to it.
 
 How it works and how to change the thresholds — [docs/CUSTOMIZE.en.md](docs/CUSTOMIZE.en.md#frame-generation).
+
+### Present Mode
+
+Present Mode is the path a game's frame takes to the screen (PresentMon data, bundled with RTSS). The full style shows
+it in colour after the resolution:
+
+| In the overlay | PresentMon mode | Meaning |
+|---|---|---|
+| 🟢 `iFlip` | Hardware: Independent Flip | the game window covers the screen and Windows hands its frames straight to the display, skipping desktop composition (DWM). Latency as in exclusive fullscreen |
+| 🟢 `iFlip MPO` | Hardware Composed: Independent Flip | the same through a dedicated GPU hardware plane (Multi-Plane Overlay): works even with windows and overlays on top of the game |
+| 🟢 `Legacy Flip` / `Legacy Copy` | Hardware: Legacy Flip / Copy to front buffer | old-style exclusive fullscreen — lowest latency too |
+| 🟡 `Composed` | Composed: Flip | frames go through DWM: +1 frame of latency, G-Sync / FreeSync may work worse |
+| 🔴 `Composed Copy` | Composed: Copy with GPU / CPU GDI | windowed mode with the old frame copy (BitBlt): +1 frame and an extra copy |
+
+**If it shows yellow or red instead of green**, the usual suspects are a window or overlay on top of the game
+(Discord overlay, Overwolf), desktop recording in NVIDIA App / AMD Adrenaline, the NIS driver upscaler, (DL)DSR,
+or Windows' "Optimizations for windowed games" and "fullscreen optimizations" turned off. The best window mode in
+modern games is borderless or fullscreen windowed; old DirectX 9 games can be moved to Flip with DXVK or dgVoodoo2.
+
+A detailed write-up with pictures, MPO checks and fixes: ["Presentation Model in Windows"](https://andrilaz.github.io/presentation-model) by Andrilaz (in Russian).
 
 ### Supported hardware
 

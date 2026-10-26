@@ -120,10 +120,12 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | 8 | Hardware Composed: Independent Flip (аппаратный слой MPO) | `PmMpo` | зелёный `iFlip MPO` |
 | 4 | Composed: Flip (через DWM) | `PmComposed` | жёлтый `Composed` |
 | 5, 6 | Composed: Copy with GPU / CPU GDI | `PmCopy` | красный `Composed Copy` |
-| 1, 2 | Hardware: Legacy Flip / Copy to front buffer | `PmLegacy` | серый `Legacy` |
+| 1 | Hardware: Legacy Flip (эксклюзивный полный экран) | `PmLegacyFlip` | зелёный `Legacy Flip` |
+| 2 | Hardware: Legacy Copy to front buffer | `PmLegacyCopy` | зелёный `Legacy Copy` |
 
 Пока режим неизвестен (0 — например, нет игры), строка показывает только разрешение. Варианты идут цепочкой
-`<IF PmIFlip>…<IF PmMpo>…<IF>`: блоки `<IF>` не вкладываются, каждый закрывает предыдущий.
+`<IF PmIFlip>…<IF PmMpo>…<IF>`: блоки `<IF>` не вкладываются, каждый закрывает предыдущий. Что значат режимы — в README
+(раздел Present Mode) и в гайде [«Presentation Model в Windows»](https://andrilaz.github.io/presentation-model) (автор Andrilaz).
 
 ## Генерация кадров
 

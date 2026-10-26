@@ -124,10 +124,12 @@ in the RTSS folder):
 | 8 | Hardware Composed: Independent Flip (MPO hardware plane) | `PmMpo` | green `iFlip MPO` |
 | 4 | Composed: Flip (through DWM) | `PmComposed` | yellow `Composed` |
 | 5, 6 | Composed: Copy with GPU / CPU GDI | `PmCopy` | red `Composed Copy` |
-| 1, 2 | Hardware: Legacy Flip / Copy to front buffer | `PmLegacy` | grey `Legacy` |
+| 1 | Hardware: Legacy Flip (exclusive fullscreen) | `PmLegacyFlip` | green `Legacy Flip` |
+| 2 | Hardware: Legacy Copy to front buffer | `PmLegacyCopy` | green `Legacy Copy` |
 
 While the mode is unknown (0 — e.g. no game), the line shows only the resolution. The variants are chained as
-`<IF PmIFlip>…<IF PmMpo>…<IF>`: `<IF>` blocks do not nest, each one closes the previous.
+`<IF PmIFlip>…<IF PmMpo>…<IF>`: `<IF>` blocks do not nest, each one closes the previous. What the modes mean — the
+Present Mode section of the README and ["Presentation Model in Windows"](https://andrilaz.github.io/presentation-model) by Andrilaz (in Russian).
 
 ## Frame generation
 

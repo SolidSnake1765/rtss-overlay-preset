@@ -65,14 +65,17 @@ function Get-CompactParts($Report) {
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / 2)'
     # Present Mode — как кадры игры попадают на экран (PresentMon, PM_PRESENT_MODE в SDK\Include\PresentMon\PresentMonAPI.h):
     # 3 — Hardware: Independent Flip (мимо рабочего стола Windows, минимальная задержка), 8 — то же через аппаратный
-    # слой MPO, 4 — Composed: Flip (через рабочий стол, DWM), 5/6 — Composed: Copy (GDI), 1/2 — Legacy (старые API).
-    # Показывается в большом виде рядом с разрешением (Build-Overlay.ps1)
+    # слой MPO, 1/2 — Hardware: Legacy Flip / Copy (эксклюзивный полный экран, тоже минимальная задержка),
+    # 4 — Composed: Flip (через рабочий стол, DWM, +1 кадр), 5/6 — Composed: Copy (BitBlt через GDI, +1 кадр и копия).
+    # Показывается в большом виде рядом с разрешением (Build-Overlay.ps1). Подробно о режимах — гайд Andrilaz
+    # https://andrilaz.github.io/presentation-model
     Src 'PresentMode' 'PresentMon' 'PresentMode' '' '%.0f'
     Src 'PmIFlip' 'HAL' 'Stub' '' '' 'PresentMode == 3'
     Src 'PmMpo' 'HAL' 'Stub' '' '' 'PresentMode == 8'
     Src 'PmComposed' 'HAL' 'Stub' '' '' 'PresentMode == 4'
     Src 'PmCopy' 'HAL' 'Stub' '' '' '(PresentMode == 5) + (PresentMode == 6)'
-    Src 'PmLegacy' 'HAL' 'Stub' '' '' '(PresentMode == 1) + (PresentMode == 2)'
+    Src 'PmLegacyFlip' 'HAL' 'Stub' '' '' 'PresentMode == 1'
+    Src 'PmLegacyCopy' 'HAL' 'Stub' '' '' 'PresentMode == 2'
 
     Src 'CPU usage' 'HAL' 'CPU usage' '%'
     Src 'CPU usage max' 'HAL' 'CPU usage max' '%'
