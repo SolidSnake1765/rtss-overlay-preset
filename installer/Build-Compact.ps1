@@ -75,6 +75,8 @@ function Get-CompactParts($Report) {
     }
     # FPS раз в секунду от самого RTSS (Exporter.dll читает общую память RTSS) — для плавного графика за ~80 с
     Src 'FpsSec' 'LHM' '/overlay-preset/fps/data/0' 'FPS' '%.0f'
+    # самый долгий кадр за секунду — для медленного графика frametime большого вида (статтеры остаются пиками)
+    Src 'FtMaxSec' 'LHM' '/overlay-preset/fps/data/1' 'ms' '%.1f'
     if ($ids.'cpu.temp') { Src 'CPU temperature' 'LHM' $ids.'cpu.temp' 'C' }
     $clocks = @(if ($ids.'cpu.clocks') { $ids.'cpu.clocks' -split ',' })
     if ($clocks.Count) {

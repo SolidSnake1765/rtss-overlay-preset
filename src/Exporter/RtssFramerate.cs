@@ -5,7 +5,11 @@
 // Steam performance monitor. The value is RTSS's own "framerate calculated once per second":
 // 1000 * dwFrames / (dwTime1 - dwTime0) of the last foreground application (RTSS SDK, RTSSSharedMemory.h).
 //
-// Exported sensor: /overlay-preset/fps/data/0 "Framerate (1 s)".
+// The same for frame time: the slowest frame of the last second, from RTSS's frame time ring buffer
+// (dwStatFrameTimeBuf, 1024 entries in microseconds, the newest at dwStatFrameTimeBufPos) — a slow graph that still
+// shows every stutter as a spike.
+//
+// Exported sensors: /overlay-preset/fps/data/0 "Framerate (1 s)", /overlay-preset/fps/data/1 "Frametime max (1 s)", ms.
 using System;
 using System.Globalization;
 using System.IO.MemoryMappedFiles;
@@ -29,21 +33,32 @@ namespace Exporter
 		const int APP_TIME0		= 268;
 		const int APP_TIME1		= 272;
 		const int APP_FRAMES	= 276;
+		const int APP_FT_BUF	= 924;		// DWORD dwStatFrameTimeBuf[1024], microseconds
+		const int APP_FT_POS	= 5020;		// index of the newest entry
+		const int FT_BUF_SIZE	= 1024;
+
+		static uint s_lastPid;
+		static uint s_lastPos;
 
 		public static string ToXml()
 		{
-			double fps;
-			if (!TryRead(out fps))
+			double fps, ftMax;
+			if (!TryRead(out fps, out ftMax))
 				return "";
 
-			return "<hardware>\n<id>/overlay-preset/fps</id><name>Framerate</name><type>Cpu</type>\n" +
-				   "<sensor><id>/overlay-preset/fps/data/0</id><name>Framerate (1 s)</name><type>Data</type><value>" +
-				   fps.ToString("F1", CultureInfo.InvariantCulture) + "</value></sensor>\n</hardware>\n";
+			string xml = "<hardware>\n<id>/overlay-preset/fps</id><name>Framerate</name><type>Cpu</type>\n" +
+						 "<sensor><id>/overlay-preset/fps/data/0</id><name>Framerate (1 s)</name><type>Data</type><value>" +
+						 fps.ToString("F1", CultureInfo.InvariantCulture) + "</value></sensor>\n";
+			if (ftMax > 0)
+				xml += "<sensor><id>/overlay-preset/fps/data/1</id><name>Frametime max (1 s)</name><type>Data</type><value>" +
+					   ftMax.ToString("F1", CultureInfo.InvariantCulture) + "</value></sensor>\n";
+			return xml + "</hardware>\n";
 		}
 
-		static bool TryRead(out double fps)
+		static bool TryRead(out double fps, out double ftMax)
 		{
 			fps = 0;
+			ftMax = 0;
 			try
 			{
 				using (MemoryMappedFile map = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read))
@@ -57,7 +72,7 @@ namespace Exporter
 					uint arrSize	= view.ReadUInt32(OFS_APP_ARR_SIZE);
 					uint index		= view.ReadUInt32(OFS_LAST_FG_APP);
 					uint pid		= view.ReadUInt32(OFS_LAST_FG_PID);
-					if (pid == 0 || index >= arrSize || entrySize < APP_FRAMES + 4)
+					if (pid == 0 || index >= arrSize || entrySize < APP_FT_POS + 4)
 						return false;
 
 					long entry = arrOffset + (long)index * entrySize;
@@ -71,6 +86,23 @@ namespace Exporter
 						return false;
 
 					fps = 1000.0 * frames / (time1 - time0);
+
+					// frames added to the ring buffer since the previous call (~1 s ago)
+					uint pos = view.ReadUInt32(entry + APP_FT_POS) % FT_BUF_SIZE;
+					if (pid == s_lastPid)
+					{
+						uint added = (pos + FT_BUF_SIZE - s_lastPos) % FT_BUF_SIZE;
+						uint max = 0;
+						for (uint k = 0; k < added; k++)
+						{
+							uint ft = view.ReadUInt32(entry + APP_FT_BUF + 4 * ((pos + FT_BUF_SIZE - k) % FT_BUF_SIZE));
+							if (ft > max)
+								max = ft;
+						}
+						ftMax = max / 1000.0;
+					}
+					s_lastPid = pid;
+					s_lastPos = pos;
 					return true;
 				}
 			}

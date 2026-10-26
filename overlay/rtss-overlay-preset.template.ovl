@@ -383,9 +383,9 @@ TextColor=8CD95A
 Name=gpu.usage.graph
 Text=<G=GPU1 usage,0,0,-1,2,100,0>
 PositionX=2
-PositionY=110
+PositionY=111
 ExtentX=189
-ExtentY=22
+ExtentY=21
 ExtentOrigin=0
 Size=80
 TextColor=FFFFFF
@@ -406,9 +406,9 @@ TextColor=FFFFFF
 Name=fps.graph
 Text=<G=Framerate,0,0,-1,0,500,0>
 PositionX=2
-PositionY=171
+PositionY=172
 ExtentX=174
-ExtentY=20
+ExtentY=19
 ExtentOrigin=0
 Size=70
 TextColor=FFFFFF
@@ -429,9 +429,9 @@ TextColor=FF5A5A,,30,FFD040,30,60,FFFFFF,60,(Framerate,0)
 Name=ft.graph
 Text=<G=Frametime,0,0,-1,0,50,0>
 PositionX=2
-PositionY=201
+PositionY=202
 ExtentX=180
-ExtentY=20
+ExtentY=19
 ExtentOrigin=0
 Size=80
 TextColor=FFFFFF
