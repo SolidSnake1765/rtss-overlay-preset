@@ -59,7 +59,7 @@ thresholds.
 The compact line is the file's last layer (`compact`): the whole line is RTSS hypertext in its **Text** field:
 `<C=RRGGBB>` — color, `<S=48>…<S=80>` — small superscript units, `<I=6,7,0,0,32,32>` / `<I=6,7,32,0,32,32>` — the ↓ and ↑
 arrows from `rtss-overlay-preset-icons.png`, `<G=…>` — the FPS graph and per-thread bars inline,
-`<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. Block colors: FPS `E8836B`, CPU `E5C35C`,
+`<IF IsFG>…<ELSE>…<IF>` — the frame generation variant of the line. The FPS graph is `<G=FpsSec,…>`: one point per second, about 80 s of history. Thread bars turn yellow from 70 % and red from 90 % load (`Warm<n>`, `Hot<n>` sources). Block colors: FPS `E8836B`, CPU `E5C35C`,
 GPU `7DC75A`, RAM `B49DDB`. To drop part of the line, delete it from the text; to move the line, move the layer.
 
 ## How style switching works
@@ -140,6 +140,7 @@ in your own layers:
 | `/overlay-preset/memory/timing/tcl`, `trcd`, `trp`, `tras`, `trc`, `trfc` | primary timings |
 | `/overlay-preset/memory/timing/tcwl`, `trefi`, `cr` | tCWL, tREFI, Command Rate (1/2) |
 | `/overlay-preset/memory/data/1` | Gear (Intel) |
+| `/overlay-preset/fps/data/0` | the foreground game's FPS once per second — from RTSS shared memory (the same calculation as RTSS itself); drives the compact line's smooth FPS graph |
 | `/overlay-preset/fg/data/0` | 1 — the foreground game has a frame generation library (DLSS-G, FSR, XeSS-FG or built-in FSR 3); the executable scan result is cached in `%ProgramData%\RTSS-Overlay-Preset\fg-cache.txt` |
 
 Timings are read straight from the memory controller: Intel Core 6th–14th gen, AMD Ryzen (Zen 2–5). Other CPUs show

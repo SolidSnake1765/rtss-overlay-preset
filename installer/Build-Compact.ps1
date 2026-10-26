@@ -16,7 +16,7 @@
 
 $script:Steam = @{
     Fps = 'E8836B'; Cpu = 'E5C35C'; Gpu = '7DC75A'; Ram = 'B49DDB'; Fg = '6EC6FF'
-    Value = 'FFFFFF'; Unit = 'A0A0A0'; Low = 'FF6B6B'; High = 'C8C8C8'; Graph = '7DC75A'
+    Value = 'FFFFFF'; Unit = 'A0A0A0'; Low = 'FF6B6B'; High = 'C8C8C8'; Graph = '7DC75A'; Warn = 'FFD040'; Hot = 'FF5A5A'
 }
 
 # Возвращает @{ Sources; Layers; Log } — источники и единственный слой компактной строки
@@ -66,7 +66,15 @@ function Get-CompactParts($Report) {
     Src 'CPU usage' 'HAL' 'CPU usage' '%'
     Src 'CPU usage max' 'HAL' 'CPU usage max' '%'
     $threads = @($cpu.PThreads) + @($cpu.EThreads) | Where-Object { $_ } | Sort-Object
-    foreach ($t in $threads) { Src "Thread $t" 'HAL' "CPU$t usage" '%' }
+    foreach ($t in $threads) {
+        Src "Thread $t" 'HAL' "CPU$t usage" '%'
+        # цвет полоски по загрузке потока: жёлтая от 70 %, красная от 90 % (одна полоска — один цвет, верх
+        # отдельно не перекрасить)
+        Src "Warm$t" 'HAL' "CPU$t usage" '' '' 'x >= 70'
+        Src "Hot$t" 'HAL' "CPU$t usage" '' '' 'x >= 90'
+    }
+    # FPS раз в секунду от самого RTSS (Exporter.dll читает общую память RTSS) — для плавного графика за ~80 с
+    Src 'FpsSec' 'LHM' '/overlay-preset/fps/data/0' 'FPS' '%.0f'
     if ($ids.'cpu.temp') { Src 'CPU temperature' 'LHM' $ids.'cpu.temp' 'C' }
     $clocks = @(if ($ids.'cpu.clocks') { $ids.'cpu.clocks' -split ',' })
     if ($clocks.Count) {
@@ -104,10 +112,16 @@ function Get-CompactParts($Report) {
     $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox>~<IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
-    $parts.Add("<C=$($P.Graph)><G=Framerate,40,9,1,0,0,90><C=$($P.Value)>")
+    # график FPS: точка раз в секунду (FpsSec), 40 единиц ≈ последние 80 с — плавно, как у Steam; встроенный
+    # <G=Framerate> добавлял точку на каждый кадр и при 150 FPS показывал полсекунды
+    $parts.Add("<C=$($P.Graph)><G=FpsSec,40,9,1,0,0,90><C=$($P.Value)>")
     # CPU: «CPU 36%/↑91% ▮▮▮ 52°C 5.03/↑5.42 GHz»
     $cpuText = "<C=$($P.Cpu)>CPU <C=$($P.Value)>%CPU usage%$(& $u '%')/<C=$($P.High)>$up<C=$($P.Value)>%CPU usage max%$(& $u '%')"
-    if ($threads.Count) { $cpuText += " <C=$($P.Graph)>" + (($threads | ForEach-Object { "<G=Thread $_,1,9,0,0,100,38>" }) -join '') + "<C=$($P.Value)>" }
+    if ($threads.Count) {
+        # <IF> не вкладываются, поэтому цвет — двумя блоками подряд: зелёный → жёлтый (Warm) → красный (Hot)
+        $bars = $threads | ForEach-Object { "<C=$($P.Graph)><IF Warm$_><C=$($P.Warn)><IF Hot$_><C=$($P.Hot)><IF><G=Thread $_,1,9,0,0,100,38>" }
+        $cpuText += ' ' + ($bars -join '') + "<C=$($P.Value)>"
+    }
     if ($ids.'cpu.temp') { $cpuText += " %CPU temperature%$(& $u '°C')" } else { $log.Add('компактный: нет температуры CPU') }
     if ($clocks.Count) { $cpuText += " %CPU clock avg%/<C=$($P.High)>$up<C=$($P.Value)>%CPU clock max%$(& $u 'GHz')" }
     $parts.Add($cpuText)
