@@ -101,7 +101,10 @@ plus 45 generated. The overlay tells them apart in three ways:
 On screen:
 - **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
   `Native Framerate  FG~ 90` (the total FPS with generation);
-- **compact line** — `FPS 45 FG~ 90 ↓… ↑…`.
+- **compact line** — `FPS 45 FG~ 90 ↓… ↑…`;
+- **the FPS and frametime graphs** and the frametime number show the pacing of the game's real frames. Otherwise they
+  turn into a "comb": a generated frame is presented right after the real one (0.4 ms, then 11.5 ms), and RTSS
+  measures those intervals, not what reaches the screen.
 
 Tested in Black Myth: Wukong (FSR 3, RTX 3080 Ti): with frame generation `FG~` and the real FPS at half the total,
 without it the normal view. DLSS FG, AFMF and Smooth Motion are not tested yet. Steam detects frame generation
