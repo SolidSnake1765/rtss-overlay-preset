@@ -144,6 +144,7 @@ RAM `B49DDB`. Чтобы убрать часть строки, удалите е
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — генерация была большую часть последних 5 с (10 обновлений по 500 мс) |
 | `IsFGApprox` | генерация не драйверная | показывать `≈` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` (`FgN` меньше 2 — делим на 2) | реальный FPS игры |
+| `FgShowN` | `DrvFG ? round(FramerateDisplayed / FrameratePresented) : FgN` | кратность в надписи `FG≈×4` (значок `×` — `<I=6,7,96,0,32,32>`) |
 
 Ритм и кратность считает `Exporter.dll` (`src\Exporter\FrameRhythm.cs`) по последним ~240 кадрам игры из общей памяти
 PresentMon (`PMDPSharedMemory`, формат — `SDK\Include\PMDPSharedMemory.h` в папке RTSS): у каждого кадра берётся время

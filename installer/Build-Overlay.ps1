@@ -215,7 +215,7 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     # «FG≈» — генерация внутри игры, реальный FPS оценён как итоговый пополам (≈ — значок из спрайта, Build-Compact.ps1)
     Set-Key (Layer 'fps.cur') 'Text' '<IF IsFG>%NativeFPS%<ELSE><FR><IF>'
     $curLabel = $layers | Where-Object { (Get-Key $_ 'Name') -eq 'label.fps' -and (Get-Key $_ 'Text') -eq 'Current Framerate' }
-    Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG> %TotalFPS%<ELSE>Current Framerate<IF>'
+    Set-Key $curLabel 'Text' '<IF IsFG>Native Framerate  <C=6EC6FF>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG><I=6,7,96,0,32,32>%FgShowN% %TotalFPS%<ELSE>Current Framerate<IF>'
     # Present Mode (источники Pm* — Build-Compact.ps1) — после разрешения: зелёный — кадры идут мимо рабочего стола
     # (iFlip, iFlip MPO, Legacy Flip/Copy — эксклюзивный полный экран), жёлтый — через рабочий стол (Composed),
     # красный — копированием (Composed Copy).
@@ -335,7 +335,7 @@ function Add-CompactStyle($Sections, $Report, $Options, $Log) {
     $general = $head | Where-Object Name -eq 'General'
     Set-Key $general 'Sources' ([string]$allSources.Count)
     Set-Key $general 'Layers' ([string]$allLayers.Count)
-    Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # значки ↓↑≈
+    Set-Key ($head | Where-Object Name -eq 'Settings') 'EmbeddedImage' 'rtss-overlay-preset-icons.png'    # значки ↓↑≈×
     if ($Options.FgDebug) {
         # отладка генерации кадров: сырые признаки справа от оверлея (install.bat -FgDebug, Make-Overlay -FgDebug)
         $kv = [ordered]@{ Name = 'fg.debug'; PositionX = 232; PositionY = 0; ExtentX = 0; ExtentY = 0; ExtentOrigin = 0; Size = 60; TextColor = 'FFFFFF'; BgndColor = 'C0000000'

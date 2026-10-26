@@ -41,7 +41,7 @@ function Get-CompactParts($Report) {
         $layers.Add($s)
     }
 
-    # значки — спрайт rtss-overlay-preset-icons.png (↓ в 0,0; ↑ в 32,0; ≈ в 64,0), красятся цветом слоя.
+    # значки — спрайт rtss-overlay-preset-icons.png (↓ в 0,0; ↑ в 32,0; ≈ в 64,0; × в 96,0), красятся цветом слоя.
     # «≈» — картинкой: символ «~» мелким шрифтом RTSS рисует плоской чёрточкой, и «FG~103» читалось как «FG-103»
     $down = '<I=6,7,0,0,32,32>'; $up = '<I=6,7,32,0,32,32>'
 
@@ -63,6 +63,8 @@ function Get-CompactParts($Report) {
     Src 'IsFG' 'HAL' 'Stub' '' '' 'swavg(FgRaw,10) >= 0.6'    # 10 обновлений оверлея по 500 мс = 5 с
     Src 'IsFGApprox' 'HAL' 'Stub' '' '' '(IsFG) ? (DrvFG == 0) : 0'
     Src 'NativeFPS' 'HAL' 'Stub' 'FPS' '%.0f' '(DrvFG) ? FrameratePresented : (TotalFPS / ((FgN >= 2) ? FgN : 2))'
+    # кратность для надписи «FG≈×4»: драйверная — измерена (кадров на экране / кадров игры), внутри игры — по ритму
+    Src 'FgShowN' 'HAL' 'Stub' '' '%.0f' '(DrvFG) ? round(FramerateDisplayed / FrameratePresented) : ((FgN >= 2) ? FgN : 2)'
     # Present Mode — как кадры игры попадают на экран (PresentMon, PM_PRESENT_MODE в SDK\Include\PresentMon\PresentMonAPI.h):
     # 3 — Hardware: Independent Flip (мимо рабочего стола Windows, минимальная задержка), 8 — то же через аппаратный
     # слой MPO, 1/2 — Hardware: Legacy Flip / Copy (эксклюзивный полный экран, тоже минимальная задержка),
@@ -127,7 +129,7 @@ function Get-CompactParts($Report) {
     $parts = New-Object System.Collections.Generic.List[string]
     # FPS: «FPS 225 ↓28 ↑419», при генерации кадров «FPS 60 FG 120 ↓95 ↑130»
     # <IF> не вкладываются: каждый следующий <IF> закрывает предыдущий, поэтому «≈» — отдельным блоком
-    $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG> <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
+    $parts.Add("<C=$($P.Fps)>FPS <C=$($P.Value)><IF IsFG>%NativeFPS% <C=$($P.Fg)>FG<IF IsFGApprox><I=6,7,64,0,32,32><IF IsFG><I=6,7,96,0,32,32>%FgShowN% <C=$($P.Value)>%TotalFPS%<ELSE><FR><IF>" +
                " <C=$($P.Low)>$down<C=$($P.Value)><FR10L> <C=$($P.High)>$up<C=$($P.Value)><FRMAX>")
     # график FPS: линия с автомасштабом на тёмной подложке
     # график FPS: точка на каждое обновление оверлея, 500 мс (FpsSec), 40 единиц ≈ последние 40 с — плавно, как у Steam; встроенный

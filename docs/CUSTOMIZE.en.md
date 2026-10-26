@@ -148,6 +148,7 @@ With frame generation RTSS counts the generated frames too. The sources (the **S
 | `IsFG` | `swavg(FgRaw,10) >= 0.6` | 1 — frame generation present for most of the last 5 s (10 updates of 500 ms) |
 | `IsFGApprox` | not driver-level | show `≈` |
 | `NativeFPS` | `DrvFG ? FrameratePresented : TotalFPS / FgN` (`FgN` below 2 — divide by 2) | the game's real FPS |
+| `FgShowN` | `DrvFG ? round(FramerateDisplayed / FrameratePresented) : FgN` | the multiplier in the `FG≈×4` caption (the `×` icon is `<I=6,7,96,0,32,32>`) |
 
 The rhythm and the multiplier are computed by `Exporter.dll` (`src\Exporter\FrameRhythm.cs`) from the game's last ~240
 frames in PresentMon's shared memory (`PMDPSharedMemory`, format — `SDK\Include\PMDPSharedMemory.h` in the RTSS folder):

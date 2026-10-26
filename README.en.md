@@ -112,8 +112,8 @@ plus 45 generated. The overlay tells them apart in three ways:
 
 On screen:
 - **full overlay** — the big number under the graph becomes the game's real FPS, the caption above the graph becomes
-  `Native Framerate  FG≈ 90` (the total FPS with generation);
-- **compact line** — `FPS 45 FG≈ 90 ↓… ↑…`.
+  `Native Framerate  FG≈×2 90` (the multiplier and the total FPS with generation);
+- **compact line** — `FPS 45 FG≈×2 90 ↓… ↑…`. With driver-level generation the multiplier is measured exactly and shown without `≈`: `FG×2`.
 
 Under frame generation the full style's FPS and frametime graphs look like a "comb", and the frametime may read a fraction of a
 millisecond: RTSS measures the time between presented frames, and a generated frame is presented right after the real

@@ -27,7 +27,7 @@ MSI Afterburner, HWiNFO и AIDA64 не нужны.
 | Драйвер PawnIO | ставится тихо, если его нет (нужен для датчиков платы, процессора и таймингов памяти) |
 | Файлы | в `RTSS\Plugins\Client\LHMDataProvider\`: LibreHardwareMonitor 0.9.6, `Exporter.dll`, модули PawnIO |
 | Железо | процессор, видеокарта, плата, память; все датчики ищутся по названию, без жёстких номеров |
-| Оверлей | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` — оба вида в одном файле, собранный под ваш ПК, + `rtss-overlay-preset-icons.png` (значки ↓↑≈) |
+| Оверлей | `RTSS\Plugins\Client\Overlays\rtss-overlay-preset.ovl` — оба вида в одном файле, собранный под ваш ПК, + `rtss-overlay-preset-icons.png` (значки ↓↑≈×) |
 | Настройки RTSS | см. ниже |
 | MSI Afterburner | если в нём включён свой оверлей — выключается только он |
 
@@ -109,7 +109,7 @@ Afterburner не обязателен. Если он стоит — пользу
    ```
    Появится `Документы\rtss-overlay-preset.ovl`. Скрипт ничего не меняет в системе, только читает датчики.
    Скопируйте файл в `RTSS\Plugins\Client\Overlays\`.
-   Рядом появится `rtss-overlay-preset-icons.png` (значки ↓↑≈) — скопируйте **оба** файла.
+   Рядом появится `rtss-overlay-preset-icons.png` (значки ↓↑≈×) — скопируйте **оба** файла.
    В файле оба вида; `-Style Compact` — сразу показывать компактную строку, `-Key 0x13` — переключать клавишей Pause
    вместо Scroll Lock (код клавиши Windows).
 5. **Включите оверлей:** запустите RTSS → **Setup** → вкладка **Плагины** → поставьте галочки **OverlayEditor.dll**
