@@ -142,3 +142,19 @@ RTSS меряет время между выводами кадров, а сге
 
 Файлы проекта — MIT (`LICENSE`). Вшитые сторонние компоненты (LibreHardwareMonitor, PawnIO и др.) распространяются
 на своих лицензиях — см. [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) и папку `licenses`.
+
+---
+
+## Другие мои проекты
+
+- **[Nilesoft Shell Preset](https://github.com/SolidSnake1765/nilesoft-shell-preset)** — FFmpeg в контекстном меню Windows:
+  конвертация, сжатие и обрезка видео, аудио и картинок (видеокарты NVIDIA, AMD, Intel). Пресет Nilesoft Shell.
+- **[Local VOT](https://github.com/SolidSnake1765/local-vot)** — закадровый перевод своих видео на русский голосами Яндекса
+  (через Яндекс Диск или Google Диск), приложение для Windows.
+- **Snake VPN** — мой личный VPN-сервис для россиян:
+  - [Бот в Telegram](https://t.me/SnakeVPNServiceBot).
+  - [snakeservice.tech](https://snakeservice.tech) — сайт сервиса. Можно пользоваться вместо бота, а можно вместе с ним:
+    подписка, устройства, оплата, поддержка. Зарегистрироваться можно через Google или Discord, Telegram не обязателен.
+  - [free.snakeservice.tech](https://free.snakeservice.tech) — бесплатные прокси для Telegram. Раньше они были внутри бота,
+    теперь на отдельном сайте. Подписка для них не нужна, так что сохраните ссылку и кидайте друзьям —
+    выручает, когда Telegram не открывается.

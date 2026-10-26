@@ -144,3 +144,19 @@ making sense. Restarting the PC helps.
 
 Project files — MIT (`LICENSE`). Bundled third-party components (LibreHardwareMonitor, PawnIO, …) keep their own
 licenses — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and the `licenses` folder.
+
+---
+
+## My other projects
+
+- **[Nilesoft Shell Preset](https://github.com/SolidSnake1765/nilesoft-shell-preset)**: FFmpeg in the Windows right-click
+  menu: convert, compress and trim video, audio and images (NVIDIA, AMD, Intel GPUs). A Nilesoft Shell preset.
+- **[Local VOT](https://github.com/SolidSnake1765/local-vot)**: Russian voice-over for your own videos with Yandex voices
+  (via Yandex Disk or Google Drive), a Windows app.
+- **Snake VPN**: my personal VPN service for users in Russia:
+  - [Telegram bot](https://t.me/SnakeVPNServiceBot).
+  - [snakeservice.tech](https://snakeservice.tech): the service website. Use it instead of the bot or together with it:
+    subscription, devices, payment, support. You can sign up with Google or Discord, Telegram is not required.
+  - [free.snakeservice.tech](https://free.snakeservice.tech): free proxies for Telegram. They used to be inside the bot,
+    now they have their own site. No subscription needed, so save the link and share it with friends:
+    it helps when Telegram does not open.
