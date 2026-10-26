@@ -9,9 +9,9 @@
 > **Вдохновлено [i2HARD](https://www.youtube.com/@i2hard)** — именно так оверлей настраивают в их тестах железа. Это не официальный
 > проект i2HARD, а пресет в их стиле, сделанный с уважением к их работе.
 
-| В игре (Uncharted, Vulkan, 2560×1440, шрифт Bahnschrift) | В редакторе оверлея RTSS |
+| В игре (Uncharted, Vulkan, 2560×1440, шрифт Bahnschrift) | Крупным планом |
 |:---:|:---:|
-| <img src="docs/images/in-game.jpg" width="400" alt="Оверлей в игре"> | <img src="docs/images/overlay.png" width="400" alt="Оверлей в редакторе RTSS"> |
+| <img src="docs/images/in-game.jpg" width="400" alt="Оверлей в игре"> | <img src="docs/images/overlay.png" width="400" alt="Большой вид крупным планом"> |
 
 **Компактная строка** в стиле Steam Performance Monitor:
 

@@ -12,6 +12,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Product   = 'RTSS Overlay Preset'
+$Version   = '1.0'
 $Root      = Split-Path -Parent $PSScriptRoot
 $Payload   = Join-Path $Root 'payload'
 $DataDir   = Join-Path $env:ProgramData 'RTSS-Overlay-Preset'
@@ -34,7 +35,7 @@ New-Item -ItemType Directory -Force $DataDir | Out-Null
 Start-Transcript -Path $LogFile -Append | Out-Null
 
 try {
-    Say -Title $Product
+    Say -Title "$Product $Version"
     Select-Language $Lang
 
     # архив с GitHub помечен «из интернета» — .NET не загрузит такие DLL, снимаем пометку
@@ -80,7 +81,7 @@ try {
             Copy-Item $src $dst
         }
     }
-    [pscustomobject]@{ RtssDir = $rtss.Dir; Date = $Stamp; Font = $Font; Style = $Style } | ConvertTo-Json | Set-Content (Join-Path $BackupDir 'backup.json') -Encoding UTF8
+    [pscustomobject]@{ Version = $Version; RtssDir = $rtss.Dir; Date = $Stamp; Font = $Font; Style = $Style } | ConvertTo-Json | Set-Content (Join-Path $BackupDir 'backup.json') -Encoding UTF8
 
     Set-Hotkeys $rtss.Dir -Defaults:$Defaults
     Say ''

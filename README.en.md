@@ -9,9 +9,9 @@ Two styles: **full**, i2HARD style, and a **compact single line**, Steam overlay
 > **Inspired by [i2HARD](https://www.youtube.com/@i2hard)** — this is how they set up the overlay in their hardware tests. Not an
 > official i2HARD project, just a preset in their style, made with respect for their work.
 
-| In game (Uncharted, Vulkan, 2560×1440, Bahnschrift font) | In the RTSS overlay editor |
+| In game (Uncharted, Vulkan, 2560×1440, Bahnschrift font) | Close-up |
 |:---:|:---:|
-| <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Overlay in the RTSS editor"> |
+| <img src="docs/images/in-game.jpg" width="400" alt="Overlay in game"> | <img src="docs/images/overlay.png" width="400" alt="Full style close-up"> |
 
 **Compact line** in the style of Steam Performance Monitor:
 
