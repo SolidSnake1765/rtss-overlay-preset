@@ -203,13 +203,10 @@ function Build-Overlay([string]$Template, $Report, $Options, [string]$OutFile) {
     # флаги RTSS: 1 — заливка, 0x80 — автомасштаб. FPS: залитая область с автомасштабом — видно и уровень,
     # и просадки при любом FPS (раньше шкала 0..500 прижимала 60 FPS к самому низу).
     # Frametime: линия с автомасштабом — каждый фриз виден пиком на любой частоте кадров.
-    # Точка на каждое обновление оверлея — 0.5 с (RefreshPeriod в шаблоне), около 3 минут на ширину графика
-    # (FpsSec, FtMaxSec — датчики Exporter.dll из общей памяти RTSS, обновляются раз в секунду, источники в Build-Compact):
-    # встроенные <G=Framerate>/<G=Frametime> добавляют точку на каждый кадр и при 150 FPS показывают долю секунды.
-    # Frametime — самый долгий кадр за секунду, поэтому статтеры видны пиками.
-    Set-Key (Layer 'fps.graph') 'Text' '<G=FpsSec,0,0,-1,0,500,81>'
+    # графики по кадрам, как у RTSS (пробовали точку раз в секунду — пики frametime превращались в ровные полки)
+    Set-Key (Layer 'fps.graph') 'Text' '<G=Framerate,0,0,-1,0,500,81>'
     Set-Key (Layer 'fps.graph') 'TextColor' "60$($script:Palette.Fps)"
-    Set-Key (Layer 'ft.graph') 'Text' '<G=FtMaxSec,0,0,-1,0,50,80>'
+    Set-Key (Layer 'ft.graph') 'Text' '<G=Frametime,0,0,-1,0,50,80>'
     Set-Key (Layer 'ft.graph') 'TextColor' $script:Palette.Fps
 
     # --- генерация кадров -------------------------------------------------------------------------
