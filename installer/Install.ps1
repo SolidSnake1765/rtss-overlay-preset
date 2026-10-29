@@ -16,7 +16,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Product   = 'RTSS Overlay Preset'
-$Version   = '1.1.1'
+$Version   = '1.1.2'
 $Root      = Split-Path -Parent $PSScriptRoot
 $Payload   = Join-Path $Root 'payload'
 $DataDir   = Join-Path $env:ProgramData 'RTSS-Overlay-Preset'
