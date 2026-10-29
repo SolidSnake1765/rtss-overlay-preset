@@ -53,6 +53,7 @@ function Start-Rtss([string]$Dir) {
 # Автозапуск RTSS с Windows — без него оверлея после перезагрузки не будет. RTSS сам делает так же:
 # задача планировщика «RTSS», при входе пользователя, с наивысшими правами, RTSS.exe /s.
 function Enable-RtssAutostart([string]$Dir) {
+    Initialize-RtssProfile $Dir 'Config'
     if (Get-ScheduledTask -TaskName 'RTSS' -ErrorAction SilentlyContinue) { return $false }
     $action    = New-ScheduledTaskAction -Execute (Join-Path $Dir 'RTSS.exe') -Argument '/s'
     $trigger   = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
@@ -63,16 +64,59 @@ function Enable-RtssAutostart([string]$Dir) {
     return $true
 }
 
+# Профиль RTSS (Profiles\Global, Profiles\Config). RTSS создаёт его из ProfileTemplates при первом сохранении
+# настроек, поэтому в RTSS, скопированном в свою папку, файла (а то и папки Profiles) может не быть — создаём так же,
+# из шаблона. Пустая папка на месте файла (её создают вручную, пытаясь помочь установщику) удаляется.
+function Initialize-RtssProfile([string]$Dir, [string]$Name) {
+    $path = Join-Path $Dir "Profiles\$Name"
+    if (Test-Path -LiteralPath $path -PathType Container) {
+        if (Get-ChildItem -LiteralPath $path -Force) {
+            throw (T "На месте файла настроек RTSS лежит папка: $path. Удалите её и запустите установщик снова." "There is a folder where the RTSS settings file should be: $path. Delete it and run the installer again.")
+        }
+        Remove-Item -LiteralPath $path -Force
+    }
+    if (Test-Path -LiteralPath $path -PathType Leaf) { return }
+    New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
+    $template = Join-Path $Dir "ProfileTemplates\$Name"
+    if (Test-Path -LiteralPath $template -PathType Leaf) {
+        # шаблон выровнен табуляциями («EnableOSD<Tab><Tab>= 1», «[OSD]   »); сам RTSS пишет профили как «ключ=значение»
+        $enc = [Text.Encoding]::GetEncoding(1251)
+        $lines = foreach ($l in ($enc.GetString([IO.File]::ReadAllBytes($template)) -split "`r?`n")) {
+            $t = $l.Trim()
+            if ($t -match '^([^=\[;]+?)\s*=\s*(.*)$') { "$($Matches[1])=$($Matches[2])" } else { $t }
+        }
+        Write-FileBytes $path $enc.GetBytes(($lines -join "`r`n").TrimEnd() + "`r`n")
+    }
+}
+
+# Запись файла настроек: папка создаётся, атрибут «только чтение» снимается; файл открывается без пересоздания
+# (File.WriteAllBytes отказывает на скрытых файлах). На месте файла папка — понятная ошибка вместо «Access denied».
+function Write-FileBytes([string]$Path, [byte[]]$Bytes) {
+    if (Test-Path -LiteralPath $Path -PathType Container) {
+        throw (T "На месте файла лежит папка: $Path. Удалите её и запустите установщик снова." "There is a folder where a file should be: $Path. Delete it and run the installer again.")
+    }
+    $dir = Split-Path $Path
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Force $dir | Out-Null }
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        $item = Get-Item -LiteralPath $Path -Force
+        if ($item.Attributes -band [IO.FileAttributes]::ReadOnly) { $item.Attributes = $item.Attributes -bxor [IO.FileAttributes]::ReadOnly }
+    }
+    $fs = [IO.File]::Open($Path, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::Write, [IO.FileShare]::ReadWrite)
+    try { $fs.SetLength(0); $fs.Write($Bytes, 0, $Bytes.Length) } finally { $fs.Dispose() }
+}
+
 # Настройки RTSS, без которых оверлей выглядит не так, как задуман.
 function Set-RtssRequiredSettings([string]$Dir) {
+    Initialize-RtssProfile $Dir 'Global'
+    Initialize-RtssProfile $Dir 'Config'
     $global = Join-Path $Dir 'Profiles\Global'
     Set-IniValue $global 'OSD' 'EnableOSD' '1'               # «Show On-Screen Display»
     Set-IniValue $global 'OSD' 'IntegerFramerate' '1'        # FPS целым числом — иначе «61.3» не влезет в поле
     # Режим «Raster 3D» во всех рендерерах: только в нём RTSS берёт шрифт из оверлея (Unispace / Bahnschrift)
     $enc = [Text.Encoding]::GetEncoding(1251)
     $text = $enc.GetString([IO.File]::ReadAllBytes($global))
-    $fixed = [regex]::Replace($text, '(?m)^Implementation=\d+', 'Implementation=2')
-    if ($fixed -ne $text) { [IO.File]::WriteAllBytes($global, $enc.GetBytes($fixed)) }
+    $fixed = [regex]::Replace($text, '(?m)^[ \t]*Implementation[ \t]*=[ \t]*\d+', 'Implementation=2')
+    if ($fixed -ne $text) { Write-FileBytes $global $enc.GetBytes($fixed) }
     Set-IniValue (Join-Path $Dir 'Profiles\Config') 'Plugins' 'OverlayEditor.dll' '1'
     Set-IniValue (Join-Path $Dir 'Profiles\Config') 'Plugins' 'HotkeyHandler.dll' '1'
     Set-IniValue (Join-Path $Dir 'Profiles\Config') 'Settings' 'StartMinimized' '1'   # «Запускать в минимизированном состоянии»
@@ -365,7 +409,7 @@ function Disable-AfterburnerOsd($Afterburner, [string]$BackupDir) {
     Copy-Item $Afterburner.Cfg (Join-Path $BackupDir 'MSI Afterburner\MSIAfterburner.cfg')
 
     $fixed = [regex]::Replace($text, '(?m)^(ShowInOSD\s*=\s*)1', '${1}0')
-    [IO.File]::WriteAllBytes($Afterburner.Cfg, $enc.GetBytes($fixed))
+    Write-FileBytes $Afterburner.Cfg $enc.GetBytes($fixed)
     if ($running) { Start-Process $exe -WorkingDirectory $Afterburner.Dir }
     return $count
 }
@@ -376,17 +420,19 @@ function Disable-AfterburnerOsd($Afterburner, [string]$BackupDir) {
 function Set-IniValue([string]$Path, [string]$Section, [string]$Key, [string]$Value) {
     $enc = [Text.Encoding]::GetEncoding(1251)
     $lines = New-Object System.Collections.Generic.List[string]
-    if (Test-Path $Path) { $lines.AddRange([string[]]($enc.GetString([IO.File]::ReadAllBytes($Path)) -split "`r?`n")) }
+    if (Test-Path -LiteralPath $Path -PathType Leaf) { $lines.AddRange([string[]]($enc.GetString([IO.File]::ReadAllBytes($Path)) -split "`r?`n")) }
     while ($lines.Count -and $lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }
-    $start = $lines.IndexOf("[$Section]")
+    # пробелы вокруг «=» и в заголовке раздела допустимы (так выглядят шаблоны RTSS)
+    $start = -1
+    for ($n = 0; $n -lt $lines.Count; $n++) { if ($lines[$n].Trim() -eq "[$Section]") { $start = $n; break } }
     if ($start -lt 0) { $lines.Add("[$Section]"); $lines.Add("$Key=$Value") }
     else {
         $i = $start + 1; $done = $false
-        while ($i -lt $lines.Count -and $lines[$i] -notmatch '^\[') {
-            if ($lines[$i] -match "^$([regex]::Escape($Key))=") { $lines[$i] = "$Key=$Value"; $done = $true; break }
+        while ($i -lt $lines.Count -and $lines[$i] -notmatch '^\s*\[') {
+            if ($lines[$i] -match "^\s*$([regex]::Escape($Key))\s*=") { $lines[$i] = "$Key=$Value"; $done = $true; break }
             $i++
         }
         if (-not $done) { $lines.Insert($i, "$Key=$Value") }
     }
-    [IO.File]::WriteAllBytes($Path, $enc.GetBytes(($lines -join "`r`n") + "`r`n"))
+    Write-FileBytes $Path $enc.GetBytes(($lines -join "`r`n") + "`r`n")
 }
